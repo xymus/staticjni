@@ -183,7 +183,7 @@ public abstract class Gen {
      * is done if either the file doesn't exist or if the contents are
      * different.
      */
-    private void writeIfChanged(byte[] b, FileObject file) throws IOException {
+    protected void writeIfChanged(byte[] b, FileObject file) throws IOException {
         boolean mustWrite = false;
         String event = "[No need to update file ";
 

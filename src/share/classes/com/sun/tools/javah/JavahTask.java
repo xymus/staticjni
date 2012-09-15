@@ -208,6 +208,12 @@ public class JavahTask implements NativeHeaderTool.NativeHeaderTask {
             }
         },
 
+        new Option(false, "-staticjni") {
+            void process(JavahTask task, String opt, String arg) {
+                task.staticjni = true;
+            }
+        },
+
         new Option(false, "-force") {
             void process(JavahTask task, String opt, String arg) {
                 task.force = true;
@@ -454,6 +460,8 @@ public class JavahTask implements NativeHeaderTool.NativeHeaderTask {
 
         if (llni)
             g = new LLNI(doubleAlign, util);
+        else if ( staticjni )
+        	g = new StaticJNI(util);
         else {
 //            if (stubs)
 //                throw new BadArgs("jni.no.stubs");
@@ -668,6 +676,7 @@ public class JavahTask implements NativeHeaderTool.NativeHeaderTask {
     boolean version;
     boolean fullVersion;
     boolean jni;
+    boolean staticjni;
     boolean llni;
     boolean doubleAlign;
     boolean force;
