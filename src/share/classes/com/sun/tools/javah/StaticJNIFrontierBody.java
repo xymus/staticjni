@@ -27,35 +27,26 @@ package com.sun.tools.javah;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.NoType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
-import javax.lang.model.element.AnnotationMirror;
-import javax.swing.text.Utilities;
-
-import com.sun.mirror.type.VoidType;
-import com.sun.tools.classfile.Annotation;
-import com.sun.tools.javac.code.Attribute;
-import com.sun.tools.javac.code.Symbol.MethodSymbol;
-import com.sun.tools.javac.util.Pair;
-
-import net.xymus.staticjni.*;
+import com.sun.tools.javah.staticjni.Callback;
+import com.sun.tools.javah.staticjni.FieldCallback;
 
 /**
  * Header file generator for JNI.
@@ -124,14 +115,11 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                     }
                     pw.println("/*");
                     pw.println(" * Class:     " + cname);
-                    pw.println(" * Method:    " +
-                               mangler.mangle(methodName, Mangle.Type.FIELDSTUB));
-                    pw.println(" * Signature: " + newtypesig.getTypeSignature(sig, mtr));
-					
-					/* Xy */
-                    pw.println(" * Imported methods:" );
+                    pw.println(" * Method:    "
+                            + mangler.mangle(methodName, Mangle.Type.FIELDSTUB));
+                    pw.println(" * Signature: "
+                            + newtypesig.getTypeSignature(sig, mtr));
                     pw.println(" */");
-                    
 
                     List<? extends VariableElement> paramargs = md.getParameters();
                     List<TypeMirror> args = new ArrayList<TypeMirror>();
@@ -152,121 +140,318 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                     
                     // implementation of outgoing calls (Java -> C)
                     // Normal JNI function impl
-                    pw.println("JNIEXPORT " + jniType(mtr) +
-                               " JNICALL " +
-                               mangler.mangleMethod(md, clazz,
-                                                   (longName) ?
-                                                   Mangle.Type.METHOD_JNI_LONG :
-                                                   Mangle.Type.METHOD_JNI_SHORT));
+                    pw.println("JNIEXPORT "
+                            + jniType(mtr)
+                            + " JNICALL "
+                            + mangler.mangleMethod(md, clazz,
+                                    (longName) ? Mangle.Type.METHOD_JNI_LONG
+                                            : Mangle.Type.METHOD_JNI_SHORT));
                     pw.print("  (JNIEnv *env, ");
-                	if (md.getModifiers().contains(Modifier.STATIC))
-                    	pw.print( "jclass self" );
+                    if (md.getModifiers().contains(Modifier.STATIC))
+                        pw.print("jclass self");
                     else
-                    	pw.print( "jobject self" );
+                        pw.print("jobject self");
 
-                    //for (TypeMirror arg: args) {
-                    for ( int a = 0; a < args.size(); a ++ )
-                        pw.print(", " + jniType(args.get(a)) + " " + paramargs.get(a).getSimpleName() );
+                    // for (TypeMirror arg: args) {
+                    for (int a = 0; a < args.size(); a++)
+                        pw.print(", " + jniType(args.get(a)) + " "
+                                + paramargs.get(a).getSimpleName());
 
                     pw.println(") {");
-                    
-                    pw.println( "\tthread_env = env;" );
-                    
-                    pw.print( "\t" );
-                    
-                    // implementation of outgoing calls (Java -> C)
-                    if ( mtr.getKind() != TypeKind.VOID )
-                    	pw.print( staticjniType( mtr ) + " rval = " );
-                    
-                	// prepare/transform arg for C
-                	pw.print( getCImplName( md, clazz, longName ) + "( " );
-                    
-                	// self type
-                	if (md.getModifiers().contains(Modifier.STATIC))
-                		pw.print("self");
-                	else
-                		pw.print( castToStaticjni(clazz.asType(), "self") );
-                    
-                	// args
-                	for ( int a = 0; a < args.size(); a ++ )
-                		pw.print( ", " + castToStaticjni( args.get(a), paramargs.get(a).getSimpleName().toString() ) );
-                	pw.println( " );" );
 
-                    if ( mtr.getKind() != TypeKind.VOID )
-                    	pw.println( "\treturn " + castFromStaticjni( mtr, "rval") + ";" );
-                    
+                    pw.println("\tthread_env = env;");
+
+                    pw.print("\t");
+
+                    // implementation of outgoing calls (Java -> C)
+                    if (mtr.getKind() != TypeKind.VOID)
+                        pw.print(staticjniType(mtr) + " rval = ");
+
+                    // prepare/transform arg for C
+                    pw.print(getCImplName(md, clazz, longName) + "( ");
+
+                    // self type
+                    if (md.getModifiers().contains(Modifier.STATIC))
+                        pw.print("self");
+                    else
+                        pw.print(castToStaticjni(clazz.asType(), "self"));
+
+                    // args
+                    for (int a = 0; a < args.size(); a++)
+                        pw.print(", "
+                                + castToStaticjni(args.get(a), paramargs.get(a)
+                                        .getSimpleName().toString()));
+                    pw.println(" );");
+
+                    if (mtr.getKind() != TypeKind.VOID)
+                        pw.println("\treturn " + castFromStaticjni(mtr, "rval")
+                                + ";");
+
                     pw.println("}");
                 }
             }
-            
-            /* Write callbacks */
-            for ( ExecutableElement m: helper.callbacks ) {
-            	
-            	// TODO add conflict detection
-            	
-            	TypeMirror rtm = m.getReturnType();
-            	
-            	/* Signature */
-            	// return
-            	pw.print( staticjniType(rtm) + " " );
-            	
-            	// fun name
-            	pw.print( getCName( m, clazz, false ) + "( " );
-            	
-            	// self
-            	if (m.getModifiers().contains(Modifier.STATIC))
-                	pw.print( "jclass self" );
-                else
-            		pw.print( staticjniType(clazz.asType()) + " self" );
 
-            	// params (with var names)
+            for ( Callback c : helper.callbacks) {
+                
+                /*** Normal callbacks ***/
+                ExecutableElement m = c.meth;
+                TypeMirror rtm = m.getReturnType();
+                String signature = normalSignature( c );
+
                 List<? extends VariableElement> paramargs = m.getParameters();
-                for (VariableElement p: paramargs) {
-                	TypeMirror arg = types.erasure(p.asType());
-            		pw.print( ", " + staticjniType(arg) + " " + p.getSimpleName().toString() );
-                }
-            	pw.println( " ) {" );
-            	
-            	
-            	/* Implementation of callback */
-
                 
-                if ( ! m.getModifiers().contains(Modifier.STATIC) ) {
-                    pw.println( "\tjclass jclass = (*thread_env)->GetObjectClass( thread_env, " + castFromStaticjni(clazz.asType(), "self") + " );" );
-                    pw.print( "\tif ( jclass == 0 ) {" );
-                    pw.print( "\t\tfprintf( stderr, \"Cannot find class\\n\" );" );
-                    pw.print( "\t}" );
-                    
-                    
-                    String sig = signature(m);
-                    TypeSignature newtypesig = new TypeSignature(elems);
-                    
-                    pw.println( "\tjmethodID jmeth = (*thread_env)->GetMethodID( thread_env, jclass, \"" + m.getSimpleName().toString() + "\", \"" + newtypesig.getTypeSignature(sig, rtm) + "\" );" );
-                    pw.print( "\tif ( jmeth == 0 ) {" ); 
-                    pw.print( "\t\tfprintf( stderr, \"Cannot find method: " + m.getSimpleName().toString() + "\\n\" );" );
-                    pw.print( "\t}" );
+                pw.println(signature + " {");
+
+                /* Implementation of callback */
+
+                if (m.getModifiers().contains(Modifier.STATIC)) {
+                    pw.println("\tjclass jclass = (*thread_env)->FindClass( thread_env, \""
+                            + c.recvType.getQualifiedName().toString().replace('.', '/') + "\" );");
+                    pw.println("\tif ( jclass == 0 ) {");
+                    pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
+                    pw.println("\t}");
+                } else {
+                    pw.println("\tjclass jclass = (*thread_env)->GetObjectClass( thread_env, "
+                            + castFromStaticjni(clazz.asType(), "self") + " );");
+                    pw.println("\tif ( jclass == 0 ) {");
+                    pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
+                    pw.println("\t}");
                 }
 
-            	pw.print( "\t" );
-                if (rtm.getKind() != TypeKind.VOID )
-                	pw.print( jniType(rtm) + " rval = " );
-                
-                pw.print( "(*thread_env)->Call" + (m.getModifiers().contains(Modifier.STATIC)? "Static":"") );
-                pw.print( getCallSuffixForReturn( rtm ) );
-                pw.print( "( thread_env, " + castFromStaticjni( clazz.asType(), "self" ) + ", " );
-                pw.print( "jmeth" );
-                for (VariableElement p: paramargs) {
-                	TypeMirror arg = types.erasure(p.asType());
-            		pw.print( ", " + castFromStaticjni( arg, p.getSimpleName().toString() ) );
+                String sig = signature(m);
+                TypeSignature newtypesig = new TypeSignature(elems);
+
+                if (m.getModifiers().contains(Modifier.STATIC)) {
+                    pw.println("\tjmethodID jmeth = (*thread_env)->GetStaticMethodID( thread_env, jclass, \""
+                            + m.getSimpleName().toString()
+                            + "\", \""
+                            + newtypesig.getTypeSignature(sig, rtm) + "\" );");
+                } else {
+                    pw.println("\tjmethodID jmeth = (*thread_env)->GetMethodID( thread_env, jclass, \""
+                            + m.getSimpleName().toString()
+                            + "\", \""
+                            + newtypesig.getTypeSignature(sig, rtm) + "\" );");
                 }
-            	pw.println( " );" );
-            	
-                if (rtm.getKind() != TypeKind.VOID )
-                	pw.println( "\treturn " + castToStaticjni(rtm, "rval") + ";" );
-            	
-            	pw.println( " }" );
+                pw.println("\tif ( jmeth == 0 ) {");
+                pw.println("\t\tfprintf( stderr, \"Cannot find method: "
+                        + m.getSimpleName().toString() + "\\n\" );");
+                pw.println("\t}");
+
+                // actual call
+                pw.print("\t");
+                if (rtm.getKind() != TypeKind.VOID)
+                    pw.print(jniType(rtm) + " rval = ");
+
+                pw.print("(*thread_env)->Call"
+                        + (m.getModifiers().contains(Modifier.STATIC) ? "Static"
+                                : ""));
+                pw.print(getCallSuffixForReturn(rtm));
+                pw.print("( thread_env, "
+                        + (m.getModifiers().contains(Modifier.STATIC)? "jclass": castFromStaticjni(clazz.asType(), "self"))
+                        + ", " );
+                pw.print("jmeth");
+                for (VariableElement p : paramargs) {
+                    TypeMirror arg = types.erasure(p.asType());
+                    pw.print(", "
+                            + castFromStaticjni(arg, p.getSimpleName()
+                                    .toString()));
+                }
+                pw.println(" );");
+
+                if (rtm.getKind() != TypeKind.VOID)
+                    pw.println("\treturn " + castToStaticjni(rtm, "rval") + ";");
+
+                pw.println("}");
             }
             
+            for ( FieldCallback c: helper.fieldCallbacks ) { // TODO
+                
+                /*** Setter ***/
+                TypeMirror rtm = c.field.asType();
+                String signature = fieldSetterSignature( c );
+                TypeSignature newtypesig = new TypeSignature(elems);
+                
+                pw.println(signature + " {");
+
+                /* Implementation of callback */
+
+                if (!c.field.getModifiers().contains(Modifier.STATIC)) {
+                    pw.println("\tjclass jclass = (*thread_env)->GetObjectClass( thread_env, "
+                            + castFromStaticjni(clazz.asType(), "self") + " );");
+                    pw.println("\tif ( jclass == 0 ) {");
+                    pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
+                    pw.println("\t}");
+
+                    pw.println("\tjfieldID jfield = (*thread_env)->GetFieldID( thread_env, jclass, \""
+                            + c.field.getSimpleName().toString() + "\", \"" +
+                            newtypesig.getTypeSignature(types.erasure( c.field.asType()).toString())
+                            + "\" );"); // TODO correct signature!
+                    pw.println("\tif ( jfield == 0 ) {");
+                    pw.println("\t\tfprintf( stderr, \"Cannot find field: "
+                            + c.field.getSimpleName().toString() + "\\n\" );");
+                    pw.println("\t}");
+                }
+
+                // actual call
+                pw.println("\t" + jniType(rtm) + " value = " + castFromStaticjni(rtm, "in_value") + ";");
+
+                pw.print("\t(*thread_env)->Set"
+                        + (c.field.getModifiers().contains(Modifier.STATIC) ? "Static"
+                                : "") );
+                pw.print(getCallTypeForReturn(rtm) + "Field");
+                pw.print("( thread_env, "
+                        + castFromStaticjni(clazz.asType(), "self") + ", jfield, ");
+                pw.print(castFromStaticjni(rtm, "value"));
+                pw.println(" );");
+
+                pw.println("}");
+                
+                
+                /*** Getter ***/
+                signature = fieldGetterSignature( c );
+                
+                pw.println(signature + " {");
+
+                /* Implementation of callback */
+
+                if (!c.field.getModifiers().contains(Modifier.STATIC)) {
+                    pw.println("\tjclass jclass = (*thread_env)->GetObjectClass( thread_env, "
+                            + castFromStaticjni(clazz.asType(), "self") + " );");
+                    pw.println("\tif ( jclass == 0 ) {");
+                    pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
+                    pw.println("\t}");
+
+                    pw.println("\tjfieldID jfield = (*thread_env)->GetFieldID( thread_env, jclass, \""
+                            + c.field.getSimpleName().toString() + "\", \"" +
+                            newtypesig.getTypeSignature(types.erasure( c.field.asType()).toString())
+                            + "\" );"); // TODO correct signature!
+                    pw.println("\tif ( jfield == 0 ) {");
+                    pw.println("\t\tfprintf( stderr, \"Cannot find field: "
+                            + c.field.getSimpleName().toString() + "\\n\" );");
+                    pw.println("\t}");
+                }
+
+                // actual call
+                pw.print("\t" + jniType(rtm) + " rval = ");
+
+                pw.print("\t(*thread_env)->Get"
+                        + (c.field.getModifiers().contains(Modifier.STATIC) ? "Static"
+                                : "") );
+                pw.print(getCallTypeForReturn(rtm) + "Field");
+                pw.println("( thread_env, "
+                        + castFromStaticjni(clazz.asType(), "self") + ", jfield );");
+
+                if (rtm.getKind() != TypeKind.VOID)
+                    pw.println("\treturn " + castToStaticjni(rtm, "rval") + ";");
+
+                pw.println("}");
+            }
+            
+            for ( Callback c: helper.superCallbacks ) {
+                
+                /*** Super ***/
+                ExecutableElement m = c.meth;
+                TypeMirror rtm = m.getReturnType();
+                String signature = superSignature( c );
+
+                List<? extends VariableElement> paramargs = m.getParameters();
+                
+                pw.println(signature + " {");
+
+                /* Implementation of callback */
+
+                if (!m.getModifiers().contains(Modifier.STATIC)) {
+                    pw.println("\tjclass jclass = (*thread_env)->GetObjectClass( thread_env, "
+                            + castFromStaticjni(clazz.asType(), "self") + " );");
+                    pw.println("\tif ( jclass == 0 ) {");
+                    pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
+                    pw.println("\t}");
+                    
+                    // retreive super class
+                    // jclass GetSuperclass(JNIEnv *env, jclass clazz);
+                    pw.print( "\tjclass = (*thread_env)->GetSuperclass(thread_env, jclass );" );
+
+                    String sig = signature(m);
+                    TypeSignature newtypesig = new TypeSignature(elems);
+
+                    pw.println("\tjmethodID jmeth = (*thread_env)->GetMethodID( thread_env, jclass, \""
+                            + m.getSimpleName().toString()
+                            + "\", \""
+                            + newtypesig.getTypeSignature(sig, rtm) + "\" );");
+                    pw.println("\tif ( jmeth == 0 ) {");
+                    pw.println("\t\tfprintf( stderr, \"Cannot find method: "
+                            + m.getSimpleName().toString() + "\\n\" );");
+                    pw.println("\t}");
+                }
+
+                // actual call
+                pw.print("\t");
+                if (rtm.getKind() != TypeKind.VOID)
+                    pw.print(jniType(rtm) + " rval = ");
+
+                pw.print("(*thread_env)->CallNonvirtual" // using Non-virtual
+                        + (m.getModifiers().contains(Modifier.STATIC) ? "Static"
+                                : ""));
+                pw.print(getCallSuffixForReturn(rtm));
+                pw.print("( thread_env, "
+                        + castFromStaticjni(clazz.asType(), "self") + ", ");
+                pw.print("jclass, ");
+                pw.print("jmeth");
+                for (VariableElement p : paramargs) {
+                    TypeMirror arg = types.erasure(p.asType());
+                    pw.print(", "
+                            + castFromStaticjni(arg, p.getSimpleName()
+                                    .toString()));
+                }
+                pw.println(" );");
+
+                if (rtm.getKind() != TypeKind.VOID)
+                    pw.println("\treturn " + castToStaticjni(rtm, "rval") + ";");
+
+                pw.println("}");
+            }
+            
+            for ( Callback c: helper.constCallbacks ) { // TODO
+                
+                /*** Constructor ***/
+                String signature = constructorSignature( c );
+                TypeMirror rtm = c.recvType.asType();
+                
+                pw.println(signature + " {");
+
+                if (!c.meth.getModifiers().contains(Modifier.STATIC)) {
+                    pw.println("\tjclass jclass = (*thread_env)->FindClass( thread_env, \""
+                            + c.recvType.getQualifiedName().toString().replace('.', '/') + "\" );");
+                    pw.println("\tif ( jclass == 0 ) {");
+                    pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
+                    pw.println("\t}");
+
+                    TypeSignature newtypesig = new TypeSignature(elems);
+                    String tsig = newtypesig.getTypeSignature(this.signature(c.meth), rtm);
+                    
+                    // replace return type with V
+                    int li = tsig.lastIndexOf(')');
+                    tsig = tsig.substring(0,li+1) + "V";
+
+                    pw.println("\tjmethodID jmeth = (*thread_env)->GetMethodID( thread_env, jclass, \"<init>\", \"" + tsig + "\" );");
+                    pw.println("\tif ( jmeth == 0 ) {");
+                    pw.println("\t\tfprintf( stderr, \"Cannot find constructor: "
+                            + c.meth.getSimpleName().toString() + "\\n\" );");
+                    pw.println("\t}");
+                }
+
+                // actual call
+                pw.print("\t" + jniType(rtm) + " rval = ");
+
+                pw.print("\t(*thread_env)->NewObject" );
+                pw.print("( thread_env, jclass, jmeth );" );
+
+                if (rtm.getKind() != TypeKind.VOID)
+                    pw.println("\treturn " + castToStaticjni(rtm, "rval") + ";");
+
+                pw.println("}");
+            }
+
             pw.println(cppGuardEnd());
         } catch (TypeSignature.SignatureException e) {
             util.error("jni.sigerror", e.getMessage());
@@ -284,10 +469,35 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
 			case LONG:     return "LongMethod";
 			case FLOAT:    return "FloatMethod";
 			case DOUBLE:   return "DoubleMethod";
-			default: 		return "ObjectMethod";
-    	}
+			default:       return "ObjectMethod";
+		}
     }
-    
+
+    String getCallTypeForReturn(TypeMirror t) {
+        switch (t.getKind()) {
+        case VOID:
+            return "Void";
+        case BOOLEAN:
+            return "Boolean";
+        case BYTE:
+            return "Byte";
+        case CHAR:
+            return "Char";
+        case SHORT:
+            return "Short";
+        case INT:
+            return "Int";
+        case LONG:
+            return "Long";
+        case FLOAT:
+            return "Float";
+        case DOUBLE:
+            return "Double";
+		default:
+			return "Object";
+		}
+	}
+
     void tryToRegisterNativeCall(TypeElement clazz, String name,
     		Set<ExecutableElement> callbacks,
     		Set<VariableElement> callbacks_to_field ) {

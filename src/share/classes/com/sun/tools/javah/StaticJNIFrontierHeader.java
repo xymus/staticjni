@@ -43,6 +43,8 @@ import javax.lang.model.util.ElementFilter;
 
 import com.sun.tools.javah.TypeSignature.SignatureException;
 import com.sun.tools.javah.Util.Exit;
+import com.sun.tools.javah.staticjni.Callback;
+import com.sun.tools.javah.staticjni.FieldCallback;
 
 
 
@@ -122,44 +124,34 @@ public class StaticJNIFrontierHeader extends StaticJNIGen {
 
             // Write referred types
             pw.println();
-	        for ( TypeMirror t: helper.referredTypes ) {
-	        	String tname = types.asElement(t).getSimpleName().toString();
-	        	pw.println( "typedef struct s_" + tname + " {" );
-	        	pw.println( "\tjobject val;" );
-	        	pw.println( "} *" + tname + ";" );
-	            pw.println();
-	        }
-	        
-	        // Write callback signatures
-            for ( ExecutableElement m: helper.callbacks ) {
-            	
-            	// TODO add conflict detection
-            	
-            	// return
-            	pw.print( staticjniType(m.getReturnType()) + " " );
-            	
-            	// fun name
-            	pw.print( getCName( m, clazz, false ) + "( " );
-            	
-            	// self
-            	if (m.getModifiers().contains(Modifier.STATIC))
-                	pw.print( "jclass" );
-                else
-            		pw.print( staticjniType(clazz.asType()) );
-
-            	// params
-                List<? extends VariableElement> paramargs = m.getParameters();
-                for (VariableElement p: paramargs) {
-                	TypeMirror arg = types.erasure(p.asType());
-            		//pw.print( ", " + castToStaticjni( arg, p.getSimpleName().toString() ) );
-            		pw.print( ", " + staticjniType(arg) );
-                }
-            	pw.println( " );" );
-            	
+            for ( TypeMirror t: helper.referredTypes ) {
+                String tname = types.asElement(t).getSimpleName().toString();
+                pw.println( "typedef struct s_" + tname + " {" );
+                pw.println( "\tjobject val;" );
+                pw.println( "} *" + tname + ";" );
+                pw.println();
             }
             
-	        pw.println(cppGuardEnd());
-	        pw.println(guardEnd(cname));
+            // Write callback signatures
+            for ( Callback c: helper.callbacks ) {
+                pw.println( normalSignature( c ) + ";" );
+            }
+            
+            for ( FieldCallback c: helper.fieldCallbacks ) {
+                pw.println( fieldSetterSignature( c ) + ";" );
+                pw.println( fieldGetterSignature( c ) + ";" );
+            }
+            
+            for ( Callback c: helper.superCallbacks ) {
+                pw.println( superSignature( c ) + ";" );
+            }
+            
+            for ( Callback c: helper.constCallbacks ) {
+                pw.println( constructorSignature( c ) + ";" );
+            }
+            
+            pw.println(cppGuardEnd());
+            pw.println(guardEnd(cname));
         } catch (TypeSignature.SignatureException e) {
             util.error("jni.sigerror", e.getMessage());
         }

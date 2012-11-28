@@ -40,7 +40,8 @@ import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
-
+import com.sun.tools.javah.staticjni.Callback;
+import com.sun.tools.javah.staticjni.FieldCallback;
 
 /**
  * Header file generator for JNI.
@@ -101,13 +102,29 @@ public class StaticJNIStaticHeader extends StaticJNIGen {
                     }
                     pw.println("/*");
                     pw.println(" * Class:     " + cname);
-                    pw.println(" * Method:    " +
-                               mangler.mangle(methodName, Mangle.Type.FIELDSTUB));
-                    pw.println(" * Signature: " + newtypesig.getTypeSignature(sig, mtr));
-					
-					/* Xy */
-                    pw.println(" * Imported methods: " );
+                    pw.println(" * Method:    "
+                            + mangler.mangle(methodName, Mangle.Type.FIELDSTUB));
+                    pw.println(" * Signature: "
+                            + newtypesig.getTypeSignature(sig, mtr));
+
+                    /*** Imported methods ***/
+                    // TODO make specific to method
+                    pw.println(" * Imported methods:");
+                    for ( Callback c : helper.callbacks) {
+                        pw.println(" *   " + normalSignature(c) );
+                    }
+                    for ( FieldCallback c : helper.fieldCallbacks) {
+                        pw.println(" *   " + fieldSetterSignature(c) );
+                        pw.println(" *   " + fieldGetterSignature(c) );
+                    }
+                    for ( Callback c : helper.superCallbacks) {
+                        pw.println(" *   " + superSignature(c) );
+                    }
+                    for ( Callback c : helper.constCallbacks) {
+                        pw.println(" *   " + constructorSignature(c) );
+                    }
                     pw.println(" */");
+
                     
                     
                     pw.println( staticjniType(mtr) + " " +

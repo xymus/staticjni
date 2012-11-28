@@ -45,8 +45,8 @@ import javax.lang.model.util.ElementFilter;
 import com.sun.javadoc.Type;
 import com.sun.tools.javah.TypeSignature.SignatureException;
 import com.sun.tools.javah.Util.Exit;
-
-
+import com.sun.tools.javah.staticjni.Callback;
+import com.sun.tools.javah.staticjni.FieldCallback;
 
 /**
  * Header file generator for JNI.
@@ -117,16 +117,36 @@ public abstract class StaticJNIGen extends JNI {
         util.bug("jni.unknown.type");
         return null; /* dead code. */
     }
-    
-    protected String getCName( ExecutableElement md, TypeElement clazz, boolean longName ) throws SignatureException {
-    	return mangler.mangleMethod(md, clazz, Mangle.Type.METHOD_JNI_SHORT ).substring(5);
-                /*(longName) ?
-                Mangle.Type.METHOD_JNI_LONG :
-                Mangle.Type.METHOD_JNI_SHORT);*/
+
+    protected String getCName(ExecutableElement md, TypeElement clazz,
+            boolean longName) {
+        return clazz.getSimpleName().toString() + "_" + md.getSimpleName();
+        /*try {
+            return mangler.mangleMethod(md, clazz, Mangle.Type.METHOD_JNI_SHORT)
+                .substring(5);
+        }
+        catch ( SignatureException ex ) {
+            return ""; // TODO when can this happen
+        }
+        /*
+         * (longName) ? Mangle.Type.METHOD_JNI_LONG :
+         * Mangle.Type.METHOD_JNI_SHORT);
+         */
     }
-    protected String getCImplName( ExecutableElement md, TypeElement clazz, boolean longName ) throws SignatureException { 
-    		return getCName( md, clazz, longName ) + "__impl";
-	}
+
+    protected String getCName(VariableElement md, TypeElement clazz,
+            boolean longName) {
+        return clazz.getSimpleName().toString() + "_" + md.getSimpleName();
+        /*
+         * (longName) ? Mangle.Type.METHOD_JNI_LONG :
+         * Mangle.Type.METHOD_JNI_SHORT);
+         */
+    }
+
+    protected String getCImplName(ExecutableElement md, TypeElement clazz,
+            boolean longName) throws SignatureException {
+        return getCName(md, clazz, longName) + "__impl";
+    }
 
     protected String castToStaticjni(TypeMirror arg, String name) {
     	if ( advancedStaticType( arg ) )
@@ -148,6 +168,135 @@ public abstract class StaticJNIGen extends JNI {
     
     @Override
     public void write(OutputStream o, TypeElement clazz) throws Exit {
-    	helper.setCurrentClass( clazz );
+        helper.setCurrentClass(clazz);
+    }
+    
+    String normalSignature( Callback callback )
+    {
+        ExecutableElement m = callback.meth;
+        
+        // TODO add conflict detection
+        
+        // return
+        String r = staticjniType(m.getReturnType()) + " ";
+        
+        // fun name
+        r += getCName( m, callback.recvType, false ) + "( ";
+        
+        // self
+        ArrayList<String> args = new ArrayList<String>();
+        if (!m.getModifiers().contains(Modifier.STATIC))
+            args.add( staticjniType(callback.recvType.asType()) + " self" );
+
+        // params
+        List<? extends VariableElement> paramargs = m.getParameters();
+        for (VariableElement p: paramargs) {
+            TypeMirror arg = types.erasure(p.asType());
+            args.add( staticjniType(arg) + " " + p.getSimpleName() );
+        }
+        
+        if ( args.size() > 0 )
+            r += args.get(0);
+        if ( args.size() > 1 )
+            for ( String s: args.subList(1, args.size()) )
+                r += ", " + s;
+            
+        r += " )";
+        return r;
+    }
+    
+    String superSignature( Callback callback )
+    {
+        ExecutableElement m = callback.meth;
+        
+        String r = staticjniType(m.getReturnType()) + " ";
+        
+        // fun name
+        r += "super_" + getCName( m, callback.recvType, false ) + "( ";
+        
+        // self
+        ArrayList<String> args = new ArrayList<String>();
+        if (!m.getModifiers().contains(Modifier.STATIC))
+            args.add( staticjniType(callback.recvType.asType()) + " self" );
+
+        // params
+        List<? extends VariableElement> paramargs = m.getParameters();
+        for (VariableElement p: paramargs) {
+            TypeMirror arg = types.erasure(p.asType());
+            args.add( staticjniType(arg) + " " + p.getSimpleName() );
+        }
+        
+        if ( args.size() > 0 )
+            r += args.get(0);
+        if ( args.size() > 1 )
+            for ( String s: args.subList(1, args.size()) )
+                r += ", " + s;
+            
+        r += " )";
+        return r;
+    }
+    
+    String fieldGetterSignature( FieldCallback callback )
+    {
+        String baseName = getCName( callback.field, callback.recvType, false );
+        String fieldStaticjniType = staticjniType(callback.field.asType());
+        String receiverStaticJNIjniType = staticjniType(callback.recvType.asType());
+        // TODO static field if (!c.field.getModifiers().contains(Modifier.STATIC)
+        
+        String getter = fieldStaticjniType + " get_" + baseName + "( " + receiverStaticJNIjniType + " self )";
+        
+        return getter;
+    }
+    
+    String fieldSetterSignature( FieldCallback callback )
+    {
+        String baseName = getCName( callback.field, callback.recvType, false );
+        String fieldStaticjniType = staticjniType(callback.field.asType());
+        String receiverStaticJNIjniType = staticjniType(callback.recvType.asType());
+        // TODO static field if (!c.field.getModifiers().contains(Modifier.STATIC)
+        
+        // setter
+        String setter = "void assign_" + baseName + "( " + receiverStaticJNIjniType + " self, " + fieldStaticjniType + " in_value )";
+        
+        return setter;
+    }
+    
+    String constructorSignature( Callback callback )
+    {
+        ExecutableElement m = callback.meth;
+        
+        String r = staticjniType(callback.recvType.asType()) + " ";
+        
+        // fun name
+        r += "new_" + callback.recvType.getSimpleName() + "( ";
+        
+        // params
+        ArrayList<String> args = new ArrayList<String>();
+        List<? extends VariableElement> paramargs = m.getParameters();
+        for (VariableElement p: paramargs) {
+            TypeMirror arg = types.erasure(p.asType());
+            args.add( staticjniType(arg) + " " + p.getSimpleName() );
+        }
+        
+        if ( args.size() > 0 )
+            r += args.get(0);
+        if ( args.size() > 1 )
+            for ( String s: args.subList(1, args.size()) )
+                r += ", " + s;
+            
+        r += " )";
+        return r;
+    }
+    
+    String constructorSignature(ExecutableElement e) { // TODO remove if not used
+        StringBuffer sb = new StringBuffer("(");
+        String sep = "";
+        for (VariableElement p : e.getParameters()) {
+            sb.append(sep);
+            sb.append(types.erasure(p.asType()).toString());
+            sep = ",";
+        }
+        sb.append(")");
+        return sb.toString();
     }
 }
