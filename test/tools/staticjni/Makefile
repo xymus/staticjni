@@ -1,3 +1,3 @@
 all:
-	make -C test_local
+	make -C simple
 	make -C complex

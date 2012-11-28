@@ -1,18 +1,18 @@
 import net.xymus.staticjni.*;
 
-class TestLocal {
+class Simple {
 
 	int i = 12345;
 
 	public static void main ( String[] args ) {
 		System.out.println( "test local" );
 
-		TestLocal a = new TestLocal();
+		Simple a = new Simple();
 		a.foo();
 		System.out.println( a.bar( 12, 34, 'u' ) );
 	}
 
-	protected TestLocal(){}
+	protected Simple(){}
 
 	protected int javaMeth( int a ) {
 		return a * 12;
@@ -25,6 +25,6 @@ class TestLocal {
 	private native int bar( int a, int b, char c );
 
 	static {
-		System.loadLibrary( "TestLocal" );
+		System.loadLibrary( "Simple" );
 	}
 }

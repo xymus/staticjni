@@ -1,30 +1,30 @@
-#include "TestLocal.h"
+#include "Simple.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 /*
- * Class:     TestLocal
+ * Class:     Simple
  * Method:    foo
  * Signature: ()V
  * Imported methods: 
  */
-void TestLocal_foo__impl( TestLocal self )
+void Simple_foo__impl( Simple self )
 {
-	jint v = TestLocal_javaMeth( self, 123 );
+	jint v = Simple_javaMeth( self, 123 );
 	printf( "foo %d\n", v );
 }
 
 /*
- * Class:     TestLocal
+ * Class:     Simple
  * Method:    bar
  * Signature: (IIC)I
  * Imported methods: 
  */
-jint TestLocal_bar__impl( TestLocal self, jint a, jint b, jchar c)
+jint Simple_bar__impl( Simple self, jint a, jint b, jchar c)
 {
 	printf( "bar intro\n" );
-	TestLocal_foo( self );
+	Simple_foo( self );
 	printf( "bar %d %d %c\n", a, b, c );
 	return a + b;
 }
