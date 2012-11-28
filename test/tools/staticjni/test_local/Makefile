@@ -2,7 +2,7 @@ CLASSPATH=../../../../src/share/classes/
 JAVAH=java -cp ../../../../dist/lib/javah.jar com.sun.tools.javah.Main
 JAVA_INCLUDE_PATH = /usr/lib/jvm/java-6-openjdk/include/
 
-all: run
+default: run
 
 frontier:
 	javac -classpath ${CLASSPATH} TestLocal.java
@@ -14,3 +14,6 @@ so: frontier
 
 run: so
 	java -Djava.library.path=. -cp ${CLASSPATH}:. TestLocal
+
+clean:
+	rm *.class *.so *.o TestLocal_frontier.[ch] TestLocal.h
