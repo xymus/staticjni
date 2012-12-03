@@ -26,10 +26,13 @@
 package com.sun.tools.javah;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -41,6 +44,9 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
+import javax.tools.JavaFileManager;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
 
 import com.sun.tools.javac.code.Attribute.Array;
 import com.sun.tools.javah.Util.Exit;
@@ -112,5 +118,16 @@ public class StaticJNI extends StaticJNIGen {
 
 	@Override
 	public void write(OutputStream o, TypeElement clazz) throws Exit {
+	}
+	
+	@Override
+    public void setOutFile(JavaFileObject outFile) {
+        static_header.setOutFile(outFile);
+    }
+
+	public void setFileManagerLocal(JavaFileManager fileManager) {
+		super.setFileManager(fileManager);
+		frontier_header.setFileManager(fileManager);
+	    frontier_body.setFileManager(fileManager);
 	}
 }

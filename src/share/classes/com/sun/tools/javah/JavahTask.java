@@ -473,6 +473,11 @@ public class JavahTask implements NativeHeaderTool.NativeHeaderTask {
                 diagnosticListener.report(createDiagnostic("err.cant.use.option.for.fm", "-o"));
                 return false;
             }
+            
+            if (staticjni) {
+            	((StaticJNI)g).setFileManagerLocal(fileManager);
+            }
+            
             Iterable<? extends JavaFileObject> iter =
                     ((StandardJavaFileManager) fileManager).getJavaFileObjectsFromFiles(Collections.singleton(ofile));
             JavaFileObject fo = iter.iterator().next();
