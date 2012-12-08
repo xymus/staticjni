@@ -132,20 +132,21 @@ public class StaticJNIStaticHeader extends StaticJNIGen {
                     pw.print("  ( ");
                     
                     List<? extends VariableElement> paramargs = md.getParameters();
-                    List<TypeMirror> args = new ArrayList<TypeMirror>();
-                    for (VariableElement p: paramargs) {
-                        args.add(types.erasure(p.asType()));
-                    }
-                    if (md.getModifiers().contains(Modifier.STATIC))
-                        pw.print("jclass"); // à conserver
-                    else
-                        pw.print( staticjniType(clazz.asType()) );
+                    List<String> args = new ArrayList<String>();
+                    
+                    if (!md.getModifiers().contains(Modifier.STATIC))
+                    	args.add( staticjniType(clazz.asType()) );
 
-                    for (TypeMirror arg: args) {
-                        pw.print(", ");
-                        pw.print(staticjniType(arg));
-                    }
-                    pw.println(");" + lineSep);
+                    for (VariableElement p: paramargs)
+                        args.add(staticjniType(types.erasure(p.asType())));
+                    
+                    if ( !args.isEmpty() )
+                        pw.print( args.get(0) );
+                    	
+                    for ( int i = 1; i < args.size(); i ++ )
+                        pw.print(", " + args.get(i) );
+                    
+                	pw.println( " );" );
                 }
             }
             
