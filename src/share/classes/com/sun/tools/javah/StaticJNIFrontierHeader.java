@@ -75,6 +75,8 @@ public class StaticJNIFrontierHeader extends StaticJNIGen {
             pw.println(guardBegin(cname));
             pw.println(cppGuardBegin());
             
+            pw.println( "extern JNIEnv *thread_env;" );
+            
             // Declare indirect method
             List<ExecutableElement> classmethods = ElementFilter.methodsIn(clazz.getEnclosedElements());
             for (ExecutableElement md: classmethods) {

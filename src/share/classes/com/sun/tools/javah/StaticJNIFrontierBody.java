@@ -79,7 +79,9 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
             
             pw.println(cppGuardBegin());
             
+            pw.println( "#ifndef STATICJNI_THREAD_ENV" );
             pw.println( "JNIEnv *thread_env;" );
+            pw.println( "#endif" );
             
             /* List of callbacks to Java */
           //  Set<ExecutableElement> callbacks = new HashSet<>();
