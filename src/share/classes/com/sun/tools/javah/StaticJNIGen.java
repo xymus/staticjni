@@ -163,7 +163,14 @@ public abstract class StaticJNIGen extends JNI {
 	}
     
     protected boolean	advancedStaticType( TypeMirror t ) {
-		return t.getKind() == TypeKind.DECLARED;
+        TypeElement throwable = elems.getTypeElement("java.lang.Throwable");
+        TypeElement jClass = elems.getTypeElement("java.lang.Class");
+        TypeElement jString = elems.getTypeElement("java.lang.String");
+        Element tclassDoc = types.asElement(t);
+        
+		return t.getKind() == TypeKind.DECLARED &&
+				!tclassDoc.equals(jString) && !types.isAssignable(t, throwable.asType()) &&
+				!types.isAssignable(t, jClass.asType());
 	}
     
     @Override
