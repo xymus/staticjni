@@ -78,6 +78,29 @@ void Complex_playWithMethods__impl
 void Complex_playWithStatics__impl
  ( Complex self ) {
 	Complex_StaticFoo();
+	Complex_StaticBar();
+}
+
+/*
+ * Class:     complex_Complex
+ * Method:    StaticBar
+ * Signature: ()V
+ * Imported methods:
+ *   void Sub_foo( Sub self )
+ *   Sub Complex_playWithConstructors( Complex self )
+ *   void Complex_playWithFields( Complex self, Sub arg0 )
+ *   void Complex_StaticBar(  )
+ *   void Complex_StaticFoo(  )
+ *   void Complex_playWithStatics( Complex self )
+ *   void assign_Complex_local_sub( Complex self, Sub in_value )
+ *   Sub get_Complex_local_sub( Complex self )
+ *   void assign_Sub_i( Sub self, jint in_value )
+ *   jint get_Sub_i( Sub self )
+ *   jint super_Complex_hashCode( Complex self )
+ *   Sub new_Sub(  )
+ */
+void Complex_StaticBar__impl() {
+	printf( "StaticBar\n" );
 }
 
 /*

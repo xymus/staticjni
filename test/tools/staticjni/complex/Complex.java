@@ -39,11 +39,12 @@ public class Complex {
 	/*
 	 * Simply call StaticFoo
 	 */
-	@NativeCall( "StaticFoo" )
+	@NativeCalls( {"StaticFoo", "StaticBar"} )
 	public native void playWithStatics();
 	static public void StaticFoo() {
 		System.out.println( "StaticFoo" );
 	}
+	static native void StaticBar();
 
 	/*
 	 * Instantiate a Sub and returns it
