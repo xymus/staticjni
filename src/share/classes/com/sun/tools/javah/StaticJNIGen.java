@@ -41,6 +41,7 @@ import javax.lang.model.type.TypeMirror;
 import com.sun.tools.javah.TypeSignature.SignatureException;
 import com.sun.tools.javah.Util.Exit;
 import com.sun.tools.javah.staticjni.Callback;
+import com.sun.tools.javah.staticjni.ExceptionCallback;
 import com.sun.tools.javah.staticjni.FieldCallback;
 
 /**
@@ -302,5 +303,10 @@ public abstract class StaticJNIGen extends JNI {
         }
         sb.append(")");
         return sb.toString();
+    }
+    
+    String throwSignature(ExceptionCallback e) {
+    	TypeElement t = (TypeElement)types.asElement(e.exceptionType);
+        return "void throw_new_"+t.getSimpleName()+"( const char* msg )";
     }
 }
