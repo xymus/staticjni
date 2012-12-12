@@ -15,22 +15,22 @@ extern "C" {
  *   void Sub_foo( Sub )
  *   void Complex_playWithFields( Complex, Sub )
  *   void Complex_StaticFoo(  )
- *   void assign_Sub_i( Sub self, Sub in_value )
+ *   void set_Sub_i( Sub self, Sub in_value )
  *   Sub get_Sub_i( Sub self )
- *   void assign_Complex_local_sub( Complex self, Complex in_value )
+ *   void set_Complex_local_sub( Complex self, Complex in_value )
  *   Complex get_Complex_local_sub( Complex self )
  *   jint super_Complex_hashCode( Complex );
  *   void new_Complex__0003cinit_0003e(  )
  */
 void Complex_playWithFields__impl
  ( Complex self, Sub sub ) {
-	assign_Complex_local_sub( self, sub );
+	set_Complex_local_sub( self, sub );
 
 	Sub local_sub = get_Complex_local_sub( self );
 	jint i = get_Sub_i( local_sub );
 	printf( "playWithFields: local_sub.i == {%d}\n", i );
 
-	assign_Sub_i( local_sub, 12345 );
+	set_Sub_i( local_sub, 12345 );
 }
 
 /*
@@ -42,9 +42,9 @@ void Complex_playWithFields__impl
  *   void Sub_foo( Sub )
  *   void Complex_playWithFields( Complex, Sub )
  *   void Complex_StaticFoo(  )
- *   void assign_Sub_i( Sub self, Sub in_value )
+ *   void set_Sub_i( Sub self, Sub in_value )
  *   Sub get_Sub_i( Sub self )
- *   void assign_Complex_local_sub( Complex self, Complex in_value )
+ *   void set_Complex_local_sub( Complex self, Complex in_value )
  *   Complex get_Complex_local_sub( Complex self )
  *   jint super_Complex_hashCode( Complex );
  *   void new_Complex__0003cinit_0003e(  )
@@ -68,9 +68,9 @@ void Complex_playWithMethods__impl
  *   void Sub_foo( Sub )
  *   void Complex_playWithFields( Complex, Sub )
  *   void Complex_StaticFoo(  )
- *   void assign_Sub_i( Sub self, Sub in_value )
+ *   void set_Sub_i( Sub self, Sub in_value )
  *   Sub get_Sub_i( Sub self )
- *   void assign_Complex_local_sub( Complex self, Complex in_value )
+ *   void set_Complex_local_sub( Complex self, Complex in_value )
  *   Complex get_Complex_local_sub( Complex self )
  *   jint super_Complex_hashCode( Complex );
  *   void new_Complex__0003cinit_0003e(  )
@@ -92,9 +92,9 @@ void Complex_playWithStatics__impl
  *   void Complex_StaticBar(  )
  *   void Complex_StaticFoo(  )
  *   void Complex_playWithStatics( Complex self )
- *   void assign_Complex_local_sub( Complex self, Sub in_value )
+ *   void set_Complex_local_sub( Complex self, Sub in_value )
  *   Sub get_Complex_local_sub( Complex self )
- *   void assign_Sub_i( Sub self, jint in_value )
+ *   void set_Sub_i( Sub self, jint in_value )
  *   jint get_Sub_i( Sub self )
  *   jint super_Complex_hashCode( Complex self )
  *   Sub new_Sub(  )
@@ -112,9 +112,9 @@ void Complex_StaticBar__impl() {
  *   void Sub_foo( Sub )
  *   void Complex_playWithFields( Complex, Sub )
  *   void Complex_StaticFoo(  )
- *   void assign_Sub_i( Sub self, Sub in_value )
+ *   void set_Sub_i( Sub self, Sub in_value )
  *   Sub get_Sub_i( Sub self )
- *   void assign_Complex_local_sub( Complex self, Complex in_value )
+ *   void set_Complex_local_sub( Complex self, Complex in_value )
  *   Complex get_Complex_local_sub( Complex self )
  *   jint super_Complex_hashCode( Complex );
  *   void new_Complex__0003cinit_0003e(  )
@@ -133,9 +133,9 @@ Sub Complex_playWithConstructors__impl
  *   void Sub_foo( Sub )
  *   void Complex_playWithFields( Complex, Sub )
  *   void Complex_StaticFoo(  )
- *   void assign_Sub_i( Sub self, Sub in_value )
+ *   void set_Sub_i( Sub self, Sub in_value )
  *   Sub get_Sub_i( Sub self )
- *   void assign_Complex_local_sub( Complex self, Complex in_value )
+ *   void set_Complex_local_sub( Complex self, Complex in_value )
  *   Complex get_Complex_local_sub( Complex self )
  *   jint super_Complex_hashCode( Complex );
  *   void new_Complex__0003cinit_0003e(  )

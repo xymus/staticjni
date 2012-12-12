@@ -258,9 +258,9 @@ public abstract class StaticJNIGen extends JNI {
         
         // setter
         if (callback.field.getModifiers().contains(Modifier.STATIC))
-        	return "void assign_" + baseName + "( " + fieldStaticjniType + " in_value )";
+        	return "void set_" + baseName + "( " + fieldStaticjniType + " in_value )";
         else
-        	return "void assign_" + baseName + "( " + receiverStaticJNIjniType + " self, " + fieldStaticjniType + " in_value )";
+        	return "void set_" + baseName + "( " + receiverStaticJNIjniType + " self, " + fieldStaticjniType + " in_value )";
     }
 
     String constructorSignature( Callback callback )
