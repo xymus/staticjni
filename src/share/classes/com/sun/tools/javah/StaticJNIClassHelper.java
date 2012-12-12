@@ -188,7 +188,11 @@ public class StaticJNIClassHelper {
                     }
                     
                     for ( FieldCallback f: fieldCallbacks ) {
-                        TypeMirror t = gen.types.erasure(f.field.asType());
+                        TypeMirror t = f.recvType.asType();
+                        if ( gen.advancedStaticType(t) )
+                            referredTypes.add( t );
+                        
+                        t = f.field.asType();
                         if ( gen.advancedStaticType(t) )
                             referredTypes.add( t );
                     }
