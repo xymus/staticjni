@@ -37,6 +37,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
 import com.sun.tools.javah.staticjni.Callback;
+import com.sun.tools.javah.staticjni.ExceptionCallback;
 import com.sun.tools.javah.staticjni.FieldCallback;
 
 /**
@@ -118,6 +119,9 @@ public class StaticJNIStaticHeader extends StaticJNIGen {
                     }
                     for ( Callback c : helper.constCallbacks) {
                         pw.println(" *   " + constructorSignature(c) );
+                    }
+                    for ( ExceptionCallback c: helper.exceptionCallbacks ) {
+                        pw.println( " *   " + throwSignature( c ) );
                     }
                     pw.println(" */");
 

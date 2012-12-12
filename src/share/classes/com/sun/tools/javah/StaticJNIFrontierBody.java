@@ -41,6 +41,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
 import com.sun.tools.javah.staticjni.Callback;
+import com.sun.tools.javah.staticjni.ExceptionCallback;
 import com.sun.tools.javah.staticjni.FieldCallback;
 
 /**
@@ -446,6 +447,23 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 if (rtm.getKind() != TypeKind.VOID)
                     pw.println("\treturn " + castToStaticjni(rtm, "rval") + ";");
 
+                pw.println("}");
+            }
+            
+            for ( ExceptionCallback c: helper.exceptionCallbacks ) {
+            	String signature = throwSignature( c );
+                pw.println(signature + " {");
+                
+                pw.println("\tjclass jclass = (*thread_env)->FindClass( thread_env, \""
+                        + ((TypeElement)types.asElement(c.exceptionType)).getQualifiedName().toString().replace('.', '/') + "\" );");
+                pw.println("\tif ( jclass == 0 ) {");
+                pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
+                pw.println("\t}");
+
+                pw.println("\tif ( (*thread_env)->ThrowNew(thread_env, jclass, msg ) ) {");
+                pw.println("\t\tfprintf( stderr, \"Throw failed for " + c.toString() + "\\n\" );");
+                pw.println("\t}");
+                
                 pw.println("}");
             }
 

@@ -40,6 +40,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
 import com.sun.tools.javah.staticjni.Callback;
+import com.sun.tools.javah.staticjni.ExceptionCallback;
 import com.sun.tools.javah.staticjni.FieldCallback;
 
 import net.xymus.staticjni.NativeCall;
@@ -68,6 +69,7 @@ public class StaticJNIClassHelper {
     //Set<MethodWithReceiver> remoteCallbacks = new HashSet<MethodWithReceiver>();
     Set<Callback> superCallbacks = new HashSet<Callback>();
     Set<Callback> constCallbacks = new HashSet<Callback>();
+    Set<ExceptionCallback> exceptionCallbacks = new HashSet<ExceptionCallback>();
     
     // Referred types
     Set<TypeMirror> referredTypes = new HashSet<TypeMirror>(); 
@@ -162,6 +164,11 @@ public class StaticJNIClassHelper {
                         if ( str.equals( NativeSuperCall.class.getCanonicalName() ) ) {
                             superCallbacks.add( new Callback(clazz, md) );
                         }
+                    }
+                    
+                    // check possible throw from the throws keyword
+                    for ( TypeMirror t : md.getThrownTypes() ) {
+                    	exceptionCallbacks.add( new ExceptionCallback(t) );
                     }
                     
                     // Scan imports for types
