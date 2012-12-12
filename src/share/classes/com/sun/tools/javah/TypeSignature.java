@@ -27,6 +27,8 @@
 package com.sun.tools.javah;
 
 import java.util.*;
+
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
@@ -227,6 +229,12 @@ public class TypeSignature {
                     }else {
                         String classname = classNameDoc.getQualifiedName().toString();
                         String newclassname = classname.replace('.', '/');
+                        
+                    	if ( classNameDoc.getEnclosingElement().getKind() == ElementKind.CLASS ) {
+                    		int i = newclassname.lastIndexOf('/');
+                    		newclassname = newclassname.substring(0,i) + "$" + newclassname.substring(i+1);
+                    	}
+                    	
                         JVMSig += "L";
                         JVMSig += newclassname;
                         JVMSig += ";";
