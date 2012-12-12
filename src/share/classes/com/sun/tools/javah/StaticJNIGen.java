@@ -235,19 +235,20 @@ public abstract class StaticJNIGen extends JNI {
         r += " )";
         return r;
     }
-    
+
     String fieldGetterSignature( FieldCallback callback )
     {
         String baseName = getCName( callback.field, callback.recvType, false );
         String fieldStaticjniType = staticjniType(callback.field.asType());
         String receiverStaticJNIjniType = staticjniType(callback.recvType.asType());
         // TODO static field if (!c.field.getModifiers().contains(Modifier.STATIC)
-        
-        String getter = fieldStaticjniType + " get_" + baseName + "( " + receiverStaticJNIjniType + " self )";
-        
-        return getter;
+
+        if (callback.field.getModifiers().contains(Modifier.STATIC))
+        	return fieldStaticjniType + " get_" + baseName + "( )";
+        else
+           	return fieldStaticjniType + " get_" + baseName + "( " + receiverStaticJNIjniType + " self )";
     }
-    
+
     String fieldSetterSignature( FieldCallback callback )
     {
         String baseName = getCName( callback.field, callback.recvType, false );
@@ -256,11 +257,12 @@ public abstract class StaticJNIGen extends JNI {
         // TODO static field if (!c.field.getModifiers().contains(Modifier.STATIC)
         
         // setter
-        String setter = "void assign_" + baseName + "( " + receiverStaticJNIjniType + " self, " + fieldStaticjniType + " in_value )";
-        
-        return setter;
+        if (callback.field.getModifiers().contains(Modifier.STATIC))
+        	return "void assign_" + baseName + "( " + fieldStaticjniType + " in_value )";
+        else
+        	return "void assign_" + baseName + "( " + receiverStaticJNIjniType + " self, " + fieldStaticjniType + " in_value )";
     }
-    
+
     String constructorSignature( Callback callback )
     {
         ExecutableElement m = callback.meth;
