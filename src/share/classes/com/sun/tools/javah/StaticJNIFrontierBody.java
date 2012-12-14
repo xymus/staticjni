@@ -286,22 +286,38 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
 
                 /* Implementation of callback */
 
-                if (!c.field.getModifiers().contains(Modifier.STATIC)) {
+                if (c.field.getModifiers().contains(Modifier.STATIC)) {
+                	String qname = c.recvType.getQualifiedName().toString().replace('.', '/');
+                	if ( c.recvType.getEnclosingElement().getKind() == ElementKind.CLASS ) {
+                		int i = qname.lastIndexOf('/');
+                		qname = qname.substring(0,i) + "$" + qname.substring(i+1);
+                	}
+            		System.out.println( qname + " " + c.recvType.getKind() + " " + c.recvType.getEnclosingElement().getKind() );
+                    pw.println("\tjclass jclass = (*thread_env)->FindClass( thread_env, \""
+                            + qname + "\" );");
+                } else {
                     pw.println("\tjclass jclass = (*thread_env)->GetObjectClass( thread_env, "
                             + castFromStaticjni(clazz.asType(), "self") + " );");
-                    pw.println("\tif ( jclass == 0 ) {");
-                    pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
-                    pw.println("\t}");
+                }
+                pw.println("\tif ( jclass == 0 ) {");
+                pw.println("\t\t(*thread_env)->FatalError( thread_env, \"Cannot find class for " + c.toString() + "\" );");
+                pw.println("\t}"); 
 
+                if (c.field.getModifiers().contains(Modifier.STATIC)) {
+                    pw.println("\tjfieldID jfield = (*thread_env)->GetStaticFieldID( thread_env, jclass, \""
+                            + c.field.getSimpleName().toString() + "\", \"" +
+                            newtypesig.getTypeSignature(types.erasure( c.field.asType()).toString())
+                            + "\" );"); // TODO correct signature!
+                } else {
                     pw.println("\tjfieldID jfield = (*thread_env)->GetFieldID( thread_env, jclass, \""
                             + c.field.getSimpleName().toString() + "\", \"" +
                             newtypesig.getTypeSignature(types.erasure( c.field.asType()).toString())
                             + "\" );"); // TODO correct signature!
-                    pw.println("\tif ( jfield == 0 ) {");
-                    pw.println("\t\tfprintf( stderr, \"Cannot find field: "
-                            + c.field.getSimpleName().toString() + "\\n\" );");
-                    pw.println("\t}");
                 }
+                pw.println("\tif ( jfield == 0 ) {");
+                pw.println("\t\tfprintf( stderr, \"Cannot find field: "
+                        + c.field.getSimpleName().toString() + "\\n\" );");
+                pw.println("\t}");
 
                 // actual call
                 pw.println("\t" + jniType(rtm) + " value = " + castFromStaticjni(rtm, "in_value") + ";");
@@ -310,8 +326,12 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                         + (c.field.getModifiers().contains(Modifier.STATIC) ? "Static"
                                 : "") );
                 pw.print(getCallTypeForReturn(rtm) + "Field");
-                pw.print("( thread_env, "
-                        + castFromStaticjni(clazz.asType(), "self") + ", jfield, ");
+                pw.print("( thread_env, " );
+                if (c.field.getModifiers().contains(Modifier.STATIC))
+                	pw.print( "jclass" + ", " );
+                else
+                	pw.print( castFromStaticjni(clazz.asType(), "self") + ", " );
+                pw.print( "jfield, ");
                 pw.print(castFromStaticjni(rtm, "value"));
                 pw.println(" );");
 
@@ -325,22 +345,39 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
 
                 /* Implementation of callback */
 
-                if (!c.field.getModifiers().contains(Modifier.STATIC)) {
+                if (c.field.getModifiers().contains(Modifier.STATIC)) {
+                	String qname = c.recvType.getQualifiedName().toString().replace('.', '/');
+                	if ( c.recvType.getEnclosingElement().getKind() == ElementKind.CLASS ) { // TODO try all levels
+                		int i = qname.lastIndexOf('/');
+                		qname = qname.substring(0,i) + "$" + qname.substring(i+1);
+                		System.out.println( "TOP_LEVEL" );
+                	}
+            		System.out.println( qname );
+                    pw.println("\tjclass jclass = (*thread_env)->FindClass( thread_env, \""
+                            + qname + "\" );");
+                } else {
                     pw.println("\tjclass jclass = (*thread_env)->GetObjectClass( thread_env, "
                             + castFromStaticjni(clazz.asType(), "self") + " );");
-                    pw.println("\tif ( jclass == 0 ) {");
-                    pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
-                    pw.println("\t}");
+                }
+                pw.println("\tif ( jclass == 0 ) {");
+                pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
+                pw.println("\t}"); 
 
+                if (c.field.getModifiers().contains(Modifier.STATIC)) {
+                    pw.println("\tjfieldID jfield = (*thread_env)->GetStaticFieldID( thread_env, jclass, \""
+                            + c.field.getSimpleName().toString() + "\", \"" +
+                            newtypesig.getTypeSignature(types.erasure( c.field.asType()).toString())
+                            + "\" );"); // TODO correct signature!
+                } else {
                     pw.println("\tjfieldID jfield = (*thread_env)->GetFieldID( thread_env, jclass, \""
                             + c.field.getSimpleName().toString() + "\", \"" +
                             newtypesig.getTypeSignature(types.erasure( c.field.asType()).toString())
                             + "\" );"); // TODO correct signature!
-                    pw.println("\tif ( jfield == 0 ) {");
-                    pw.println("\t\tfprintf( stderr, \"Cannot find field: "
-                            + c.field.getSimpleName().toString() + "\\n\" );");
-                    pw.println("\t}");
                 }
+                pw.println("\tif ( jfield == 0 ) {");
+                pw.println("\t\tfprintf( stderr, \"Cannot find field: "
+                        + c.field.getSimpleName().toString() + "\\n\" );");
+                pw.println("\t}");
 
                 // actual call
                 pw.print("\t" + jniType(rtm) + " rval = ");
@@ -349,8 +386,12 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                         + (c.field.getModifiers().contains(Modifier.STATIC) ? "Static"
                                 : "") );
                 pw.print(getCallTypeForReturn(rtm) + "Field");
-                pw.println("( thread_env, "
-                        + castFromStaticjni(clazz.asType(), "self") + ", jfield );");
+                pw.print("( thread_env, " );
+                if (c.field.getModifiers().contains(Modifier.STATIC))
+                	pw.print( "jclass" + ", " );
+                else
+                	pw.print( castFromStaticjni(clazz.asType(), "self") + ", " );
+                pw.println( "jfield );");
 
                 if (rtm.getKind() != TypeKind.VOID)
                     pw.println("\treturn " + castToStaticjni(rtm, "rval") + ";");
