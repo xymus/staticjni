@@ -40,6 +40,7 @@ import javax.lang.model.type.TypeMirror;
 
 import com.sun.tools.javah.TypeSignature.SignatureException;
 import com.sun.tools.javah.Util.Exit;
+import com.sun.tools.javah.staticjni.ArrayCallback;
 import com.sun.tools.javah.staticjni.Callback;
 import com.sun.tools.javah.staticjni.ExceptionCallback;
 import com.sun.tools.javah.staticjni.FieldCallback;
@@ -308,5 +309,38 @@ public abstract class StaticJNIGen extends JNI {
     String throwSignature(ExceptionCallback e) {
     	TypeElement t = (TypeElement)types.asElement(e.exceptionType);
         return "void throw_new_"+t.getSimpleName()+"( const char* msg )";
+    }
+    
+    String accessArrayStructureMacro(ArrayCallback c) {
+        StringBuffer sb = new StringBuffer();
+        if ( c.critical ) sb.append( "critical_" );
+        sb.append( "access_");
+        sb.append( staticjniType( c.arrayType ) );
+    	return sb.toString();
+    }
+    
+    String accessArrayGet(ArrayCallback c) {
+        StringBuffer sb = new StringBuffer();
+        sb.append( "get_");
+        if ( c.critical ) sb.append( "critical_" );
+        sb.append( "access_");
+        sb.append( staticjniType( c.arrayType ) );
+    	return sb.toString();
+    }
+    
+    String accessArrayRelease(ArrayCallback c) {
+        StringBuffer sb = new StringBuffer();
+        sb.append( "release_");
+        if ( c.critical ) sb.append( "critical_" );
+        sb.append( "access_");
+        sb.append( staticjniType( c.arrayType ) );
+    	return sb.toString();
+    }
+    
+    String accessArrayLength(ArrayCallback c) {
+        StringBuffer sb = new StringBuffer();
+        sb.append( "length_");
+        sb.append( staticjniType( c.arrayType ) );
+    	return sb.toString();
     }
 }

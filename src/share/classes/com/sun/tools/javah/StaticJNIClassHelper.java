@@ -36,13 +36,21 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
+import com.sun.tools.javah.staticjni.ArrayCallback;
 import com.sun.tools.javah.staticjni.Callback;
 import com.sun.tools.javah.staticjni.ExceptionCallback;
 import com.sun.tools.javah.staticjni.FieldCallback;
 
+import net.xymus.staticjni.NativeArrayAccess;
+import net.xymus.staticjni.NativeArrayAccesses;
+import net.xymus.staticjni.NativeArrayAccessCritical;
+import net.xymus.staticjni.NativeArrayAccessesCritical;
 import net.xymus.staticjni.NativeCall;
 import net.xymus.staticjni.NativeCalls;
 import net.xymus.staticjni.NativeNew;
@@ -70,6 +78,7 @@ public class StaticJNIClassHelper {
     Set<Callback> superCallbacks = new HashSet<Callback>();
     Set<Callback> constCallbacks = new HashSet<Callback>();
     Set<ExceptionCallback> exceptionCallbacks = new HashSet<ExceptionCallback>();
+    Set<ArrayCallback> arrayCallbacks = new HashSet<ArrayCallback>();
     
     // Referred types
     Set<TypeMirror> referredTypes = new HashSet<TypeMirror>(); 
@@ -85,6 +94,7 @@ public class StaticJNIClassHelper {
 
             callbacks.clear();
             fieldCallbacks.clear();
+            arrayCallbacks.clear();
             referredTypes.clear();
             
             List<ExecutableElement> classmethods = ElementFilter.methodsIn(clazz.getEnclosedElements());
@@ -163,6 +173,46 @@ public class StaticJNIClassHelper {
                         // super
                         if ( str.equals( NativeSuperCall.class.getCanonicalName() ) ) {
                             superCallbacks.add( new Callback(clazz, md) );
+                        }
+                        
+                        // arrays
+                        if ( str.equals( NativeArrayAccess.class.getCanonicalName() ) ) {
+                            for ( ExecutableElement p: annotation.getElementValues().keySet() )
+                                if ( p.getSimpleName().toString().equals( "value" ) ) {
+                                    Object v = annotation.getElementValues().get( p ).getValue();
+                                    if ( String.class.isInstance(v) )
+                                    	tryToRegisterNativeArrayAccess( clazz, md, v.toString(), arrayCallbacks, false );
+                                }
+                        }
+                        if ( str.equals( NativeArrayAccesses.class.getCanonicalName() ) ) {
+                            for ( ExecutableElement p: annotation.getElementValues().keySet() )
+                                if ( p.getSimpleName().toString().equals( "value" ) ) {
+                                    Object v = annotation.getElementValues().get( p ).getValue();
+                                    if ( List.class.isInstance(v) )
+                                        for ( Object e: (List<Object>)v ) {
+                                            tryToRegisterNativeArrayAccess( clazz, md, ((AnnotationValue)e).getValue().toString(), arrayCallbacks, false );
+                                        }
+                                }
+                        }
+                        
+                        // arrays critical
+                        if ( str.equals( NativeArrayAccessesCritical.class.getCanonicalName() ) ) {
+                            for ( ExecutableElement p: annotation.getElementValues().keySet() )
+                                if ( p.getSimpleName().toString().equals( "value" ) ) {
+                                    Object v = annotation.getElementValues().get( p ).getValue();
+                                    if ( String.class.isInstance(v) )
+                                    	tryToRegisterNativeArrayAccess( clazz, md, v.toString(), arrayCallbacks, true );
+                                }
+                        }
+                        if ( str.equals( NativeArrayAccessesCritical.class.getCanonicalName() ) ) {
+                            for ( ExecutableElement p: annotation.getElementValues().keySet() )
+                                if ( p.getSimpleName().toString().equals( "value" ) ) {
+                                    Object v = annotation.getElementValues().get( p ).getValue();
+                                    if ( List.class.isInstance(v) )
+                                        for ( Object e: (List<Object>)v ) {
+                                            tryToRegisterNativeArrayAccess( clazz, md, ((AnnotationValue)e).getValue().toString(), arrayCallbacks, true );
+                                        }
+                                }
                         }
                     }
                     
@@ -273,6 +323,30 @@ public class StaticJNIClassHelper {
             return;
         }
         
+        gen.util.error("err.staticjni.methnotfound", name, from );
+    }
+    
+    void tryToRegisterNativeArrayAccess(TypeElement clazz, ExecutableElement from_meth, 
+            String name, Set<ArrayCallback> callbacks, boolean critical ) {
+        TypeElement from_clazz = clazz;
+        String from = from_clazz.toString() + "." + from_meth.toString();
+        
+        int p = name.lastIndexOf("[]");
+        if ( p == -1 ) {
+            gen.util.error("err.staticjni.arrayformatinvalid", name );
+            return;
+        }
+
+    	// find class
+        TypeMirror t = javaNameToType( name );
+        
+        if ( t != null ) {
+            callbacks.add(new ArrayCallback((ArrayType)t, critical ));
+            return;
+        } else {
+            gen.util.error("err.staticjni.classnotfound", name, from );
+        }
+
         gen.util.error("err.staticjni.methnotfound", name, from );
     }
     

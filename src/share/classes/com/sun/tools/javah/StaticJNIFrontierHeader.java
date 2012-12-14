@@ -38,6 +38,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
 import com.sun.tools.javah.Util.Exit;
+import com.sun.tools.javah.staticjni.ArrayCallback;
 import com.sun.tools.javah.staticjni.Callback;
 import com.sun.tools.javah.staticjni.FieldCallback;
 
@@ -148,6 +149,22 @@ public class StaticJNIFrontierHeader extends StaticJNIGen {
             
             for ( Callback c: helper.constCallbacks ) {
                 pw.println( constructorSignature( c ) + ";" );
+            }
+            
+            for ( ArrayCallback c: helper.arrayCallbacks ) {
+            	String get_sig = accessArrayGet(c);
+            	String release_sig = accessArrayRelease(c);
+            	String length_sig = accessArrayLength(c);
+            	
+            	// Get, release and length
+                pw.println( staticjniType(c.arrayType.getComponentType()) + " *" + get_sig  + "( " + staticjniType(c.arrayType) + " );" );
+                pw.println( "void " + release_sig + "( " + staticjniType(c.arrayType) + ", " + staticjniType( c.arrayType.getComponentType() ) + "* );" );
+                pw.println( "jint " + length_sig + "( " + staticjniType(c.arrayType) + " );" );
+
+            	// macro structure
+                pw.println( "#define " + accessArrayStructureMacro(c) + "(j,n,l) \\" );
+                pw.println( "l = " + length_sig + "( j ); \\" );
+                pw.println( "for( n = 0; n == 0? (n="+get_sig+"( j ))||1:0; " + release_sig + "( j, n ))" );
             }
             
             pw.println(cppGuardEnd());

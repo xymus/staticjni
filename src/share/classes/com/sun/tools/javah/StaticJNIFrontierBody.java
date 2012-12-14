@@ -40,6 +40,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
+import com.sun.tools.javah.staticjni.ArrayCallback;
 import com.sun.tools.javah.staticjni.Callback;
 import com.sun.tools.javah.staticjni.ExceptionCallback;
 import com.sun.tools.javah.staticjni.FieldCallback;
@@ -465,6 +466,37 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 pw.println("\t}");
                 
                 pw.println("}");
+            }
+            
+            for ( ArrayCallback c: helper.arrayCallbacks ) {
+            	String get_sig = accessArrayGet(c);
+            	String release_sig = accessArrayRelease(c);
+            	String length_sig = accessArrayLength(c);
+            	
+            	// Get array
+                pw.println();
+                pw.println( staticjniType(c.arrayType.getComponentType()) + " *" + get_sig  + "( " + staticjniType(c.arrayType) + " value ) {" );
+                pw.print( "\treturn (*thread_env)->Get" );
+                pw.print( getCallTypeForReturn( c.arrayType.getComponentType() ) );
+                pw.print( "ArrayElements" );
+                pw.println( "( thread_env, value, NULL );");
+                pw.println( "};" );
+
+            	// Release array
+                pw.println();
+                pw.println( "void " + release_sig + "( " + staticjniType(c.arrayType) + " value, " + staticjniType( c.arrayType.getComponentType() ) + "* ncopy ) {" );
+                pw.print( "\treturn (*thread_env)->Release" );
+                pw.print( getCallTypeForReturn( c.arrayType.getComponentType() ) );
+                pw.print( "ArrayElements" );
+                pw.println( "( thread_env, value, ncopy, 0 );");
+                pw.println( "};" );
+
+            	// Length of array
+                pw.println();
+                pw.println( "jint " + length_sig + "( " + staticjniType(c.arrayType) + " value ) {" );
+                pw.print( "\treturn (*thread_env)->GetArrayLength" );
+                pw.println( "( thread_env, value );");
+                pw.println( "};" );
             }
 
             pw.println(cppGuardEnd());
