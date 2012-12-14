@@ -191,7 +191,7 @@ public class StaticJNIClassHelper {
                         }
                         
                         // arrays critical
-                        if ( str.equals( NativeArrayAccessesCritical.class.getCanonicalName() ) ) {
+                        if ( str.equals( NativeArrayAccessCritical.class.getCanonicalName() ) ) {
                             for ( ExecutableElement p: annotation.getElementValues().keySet() )
                                 if ( p.getSimpleName().toString().equals( "value" ) ) {
                                     Object v = annotation.getElementValues().get( p ).getValue();
