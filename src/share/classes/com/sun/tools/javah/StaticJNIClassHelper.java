@@ -275,4 +275,27 @@ public class StaticJNIClassHelper {
         
         gen.util.error("err.staticjni.methnotfound", name, from );
     }
+    
+    TypeMirror javaNameToType( String name ) {
+    	TypeMirror t;
+    	
+        int p = name.lastIndexOf("[]");
+        if ( p != -1 ) {
+        	String sub_name = name.substring(0,p);
+        	t = javaNameToType( sub_name );
+        	return gen.types.getArrayType(t);
+        }	
+        
+        if(name.equals("void")) return gen.types.getPrimitiveType( TypeKind.VOID );
+        if(name.equals("boolean")) return gen.types.getPrimitiveType( TypeKind.INT );
+        if(name.equals("byte")) return gen.types.getPrimitiveType( TypeKind.BYTE );
+        if(name.equals("char")) return gen.types.getPrimitiveType( TypeKind.CHAR );
+        if(name.equals("short")) return gen.types.getPrimitiveType( TypeKind.SHORT );
+        if(name.equals("int")) return gen.types.getPrimitiveType( TypeKind.INT );
+        if(name.equals("long")) return gen.types.getPrimitiveType( TypeKind.LONG );
+        if(name.equals("float")) return gen.types.getPrimitiveType( TypeKind.FLOAT );
+        if(name.equals("double")) return gen.types.getPrimitiveType( TypeKind.DOUBLE );
+        
+        return gen.elems.getTypeElement( name ).asType();
+    }
 }
