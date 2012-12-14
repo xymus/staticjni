@@ -469,6 +469,8 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 pw.println("\t\tfprintf( stderr, \"Throw failed for " + c.toString() + "\\n\" );");
                 pw.println("\t}");
                 
+                pw.println("\t(*thread_env)->DeleteLocalRef(thread_env, jclass );");
+                
                 pw.println("}");
             	pw.println( "#endif" );
             }
