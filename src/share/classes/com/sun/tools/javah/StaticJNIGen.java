@@ -294,7 +294,7 @@ public abstract class StaticJNIGen extends JNI {
         return r;
     }
     
-    String constructorSignature(ExecutableElement e) { // TODO remove if not used
+    String constructorSignature(ExecutableElement e) { 
         StringBuffer sb = new StringBuffer("(");
         String sep = "";
         for (VariableElement p : e.getParameters()) {

@@ -422,7 +422,7 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 pw.println("}");
             }
             
-            for ( Callback c: helper.constCallbacks ) { // TODO
+            for ( Callback c: helper.constCallbacks ) {
                 
                 /*** Constructor ***/
                 String signature = constructorSignature( c );

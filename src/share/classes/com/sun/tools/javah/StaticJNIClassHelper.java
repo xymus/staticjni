@@ -60,7 +60,7 @@ import net.xymus.staticjni.NativeSuperCall;
 /**
  * Header file generator for JNI.
  *
- * Not a true Gen... Wrapper for 3 other Gens
+ * Not a true Gen, actually a wrapper for 3 other Gens
  */
 public class StaticJNIClassHelper {
     StaticJNIClassHelper( StaticJNI gen ) {
@@ -74,7 +74,6 @@ public class StaticJNIClassHelper {
     // Explicit calls
     Set<Callback> callbacks = new HashSet<Callback>();
     Set<FieldCallback> fieldCallbacks = new HashSet<FieldCallback>();
-    //Set<MethodWithReceiver> remoteCallbacks = new HashSet<MethodWithReceiver>();
     Set<Callback> superCallbacks = new HashSet<Callback>();
     Set<Callback> constCallbacks = new HashSet<Callback>();
     Set<ExceptionCallback> exceptionCallbacks = new HashSet<ExceptionCallback>();
@@ -82,10 +81,6 @@ public class StaticJNIClassHelper {
     
     // Referred types
     Set<TypeMirror> referredTypes = new HashSet<TypeMirror>(); 
-    
-    // Explicit casts TODO
-    
-    // Super calls TODO
     
     @SuppressWarnings("unchecked")
     public void setCurrentClass ( TypeElement clazz ) {

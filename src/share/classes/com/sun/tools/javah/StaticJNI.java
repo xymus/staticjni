@@ -62,8 +62,6 @@ public class StaticJNI extends StaticJNIGen {
     protected StaticJNIFrontierBody frontier_body;
     protected StaticJNIStaticHeader static_header;
     protected ArrayList<Gen> subs;
-    
-    //StaticJNIClassHelper helper;
 
     @Override
     public String getIncludes() {
@@ -72,9 +70,7 @@ public class StaticJNI extends StaticJNIGen {
     
     @Override
     public void setClasses(Set<TypeElement> classes) {
-    	// TODO Auto-generated method stub
     	super.setClasses(classes);
-    	
     	for ( Gen g: subs ) g.setClasses(classes);
     }
     
