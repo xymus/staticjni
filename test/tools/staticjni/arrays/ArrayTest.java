@@ -1,6 +1,7 @@
 package arrays;
 
 import net.xymus.staticjni.NativeArrayAccess;
+import net.xymus.staticjni.NativeArrayAccessCritical;
 import net.xymus.staticjni.NativeCall;
 
 public class ArrayTest {
@@ -15,6 +16,7 @@ public class ArrayTest {
 	void Run() {
 		PlayWithArrayManually( int_array );
 		PlayWithArrayMacro( int_array );
+		PlayWithArrayCritical( int_array );
 	}
 	
 	@NativeArrayAccess( "int[]" )
@@ -22,6 +24,9 @@ public class ArrayTest {
 	
 	@NativeArrayAccess( "int[]" )
 	native void PlayWithArrayMacro( int[] int_array );
+	
+	@NativeArrayAccessCritical( "int[]" )
+	native void PlayWithArrayCritical( int[] int_array );
 
 	static {
 		System.loadLibrary( "ArrayTest" );
