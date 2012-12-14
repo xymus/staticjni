@@ -453,6 +453,10 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
             
             for ( ExceptionCallback c: helper.exceptionCallbacks ) {
             	String signature = throwSignature( c );
+            	
+            	String guard = "STATICJNI_THROW_" + types.asElement(c.exceptionType).getSimpleName();
+            	pw.println( "#ifndef " + guard );
+            	pw.println( "#define " + guard );
                 pw.println(signature + " {");
                 
                 pw.println("\tjclass jclass = (*thread_env)->FindClass( thread_env, \""
@@ -466,6 +470,7 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 pw.println("\t}");
                 
                 pw.println("}");
+            	pw.println( "#endif" );
             }
             
             for ( ArrayCallback c: helper.arrayCallbacks ) {
