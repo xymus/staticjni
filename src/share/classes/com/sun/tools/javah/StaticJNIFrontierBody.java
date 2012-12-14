@@ -129,11 +129,18 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                     // impl declaration
 
                 	pw.print("extern " + staticjniType( mtr ) + " " + getCImplName( md, clazz, longName ) + "( " );
-                	if (md.getModifiers().contains(Modifier.STATIC))
-                		pw.print("jclass");
-                	else
-                		pw.print( staticjniType( clazz.asType() ) );
-                    for (TypeMirror arg: args) pw.print( ", " + staticjniType(arg) );
+
+                    List<String> sArgs = new ArrayList<String>();
+                	if (!md.getModifiers().contains(Modifier.STATIC))
+                		sArgs.add( staticjniType( clazz.asType() ) );
+                	
+                    for (TypeMirror arg: args) sArgs.add( staticjniType(arg) );
+                    
+                    if ( !sArgs.isEmpty() )
+                    	pw.print( sArgs.get(0) );
+                    for (int i = 1; i < sArgs.size(); i++)
+                    	pw.print( ", " + sArgs.get(i) );
+                    
                 	pw.println( " );" );
                     
                     
@@ -169,17 +176,22 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                     // prepare/transform arg for C
                     pw.print(getCImplName(md, clazz, longName) + "( ");
 
+                    sArgs = new ArrayList<String>();
+                    
                     // self type
-                    if (md.getModifiers().contains(Modifier.STATIC))
-                        pw.print("self");
-                    else
-                        pw.print(castToStaticjni(clazz.asType(), "self"));
+                    if (!md.getModifiers().contains(Modifier.STATIC))
+                    	sArgs.add(castToStaticjni(clazz.asType(), "self"));
 
                     // args
                     for (int a = 0; a < args.size(); a++)
-                        pw.print(", "
-                                + castToStaticjni(args.get(a), paramargs.get(a)
+                    	sArgs.add( castToStaticjni(args.get(a), paramargs.get(a)
                                         .getSimpleName().toString()));
+
+                    if ( !sArgs.isEmpty() )
+                    	pw.print( sArgs.get(0) );
+                    for (int i = 1; i < sArgs.size(); i++)
+                    	pw.print( ", " + sArgs.get(i) );
+                    
                     pw.println(" );");
 
                     if (mtr.getKind() != TypeKind.VOID)
