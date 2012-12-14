@@ -471,26 +471,24 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 
                 pw.println(signature + " {");
 
-                if (!c.meth.getModifiers().contains(Modifier.STATIC)) {
-                    pw.println("\tjclass jclass = (*thread_env)->FindClass( thread_env, \""
-                            + c.recvType.getQualifiedName().toString().replace('.', '/') + "\" );");
-                    pw.println("\tif ( jclass == 0 ) {");
-                    pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
-                    pw.println("\t}");
+                pw.println("\tjclass jclass = (*thread_env)->FindClass( thread_env, \""
+                        + c.recvType.getQualifiedName().toString().replace('.', '/') + "\" );");
+                pw.println("\tif ( jclass == 0 ) {");
+                pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
+                pw.println("\t}");
 
-                    TypeSignature newtypesig = new TypeSignature(elems);
-                    String tsig = newtypesig.getTypeSignature(this.signature(c.meth), rtm);
-                    
-                    // replace return type with V
-                    int li = tsig.lastIndexOf(')');
-                    tsig = tsig.substring(0,li+1) + "V";
+                TypeSignature newtypesig = new TypeSignature(elems);
+                String tsig = newtypesig.getTypeSignature(this.signature(c.meth), rtm);
+                
+                // replace return type with V
+                int li = tsig.lastIndexOf(')');
+                tsig = tsig.substring(0,li+1) + "V";
 
-                    pw.println("\tjmethodID jmeth = (*thread_env)->GetMethodID( thread_env, jclass, \"<init>\", \"" + tsig + "\" );");
-                    pw.println("\tif ( jmeth == 0 ) {");
-                    pw.println("\t\tfprintf( stderr, \"Cannot find constructor: "
-                            + c.meth.getSimpleName().toString() + "\\n\" );");
-                    pw.println("\t}");
-                }
+                pw.println("\tjmethodID jmeth = (*thread_env)->GetMethodID( thread_env, jclass, \"<init>\", \"" + tsig + "\" );");
+                pw.println("\tif ( jmeth == 0 ) {");
+                pw.println("\t\tfprintf( stderr, \"Cannot find constructor: "
+                        + c.meth.getSimpleName().toString() + "\\n\" );");
+                pw.println("\t}");
 
                 // actual call
                 pw.print("\t" + jniType(rtm) + " rval = ");
