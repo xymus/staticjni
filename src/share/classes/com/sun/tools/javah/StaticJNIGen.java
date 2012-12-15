@@ -319,8 +319,9 @@ public abstract class StaticJNIGen extends JNI {
     	return sb.toString();
     }
     
-    String accessArrayGet(ArrayCallback c) {
+    String accessArrayGet(ArrayCallback c, TypeElement from) {
         StringBuffer sb = new StringBuffer();
+        if ( from != null ) sb.append( from.getSimpleName() + "_" );
         sb.append( "get_");
         if ( c.critical ) sb.append( "critical_" );
         sb.append( "access_");
@@ -328,8 +329,9 @@ public abstract class StaticJNIGen extends JNI {
     	return sb.toString();
     }
     
-    String accessArrayRelease(ArrayCallback c) {
+    String accessArrayRelease(ArrayCallback c, TypeElement from) {
         StringBuffer sb = new StringBuffer();
+        if ( from != null ) sb.append( from.getSimpleName() + "_" );
         sb.append( "release_");
         if ( c.critical ) sb.append( "critical_" );
         sb.append( "access_");
@@ -337,9 +339,10 @@ public abstract class StaticJNIGen extends JNI {
     	return sb.toString();
     }
     
-    String accessArrayLength(ArrayCallback c) {
+    String accessArrayLength(ArrayCallback c, TypeElement from ) {
         StringBuffer sb = new StringBuffer();
-        sb.append( "length_");
+        if ( from != null ) sb.append( from.getSimpleName() + "_" );
+        sb.append( "get_length_");
         sb.append( staticjniType( c.arrayType ) );
     	return sb.toString();
     }

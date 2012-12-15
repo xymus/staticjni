@@ -527,9 +527,9 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
             }
             
             for ( ArrayCallback c: helper.arrayCallbacks ) {
-            	String get_sig = accessArrayGet(c);
-            	String release_sig = accessArrayRelease(c);
-            	String length_sig = accessArrayLength(c);
+            	String get_sig = accessArrayGet(c,null);
+            	String release_sig = accessArrayRelease(c,null);
+            	String length_sig = accessArrayLength(c,clazz);
             	
             	// Get array
                 pw.println();

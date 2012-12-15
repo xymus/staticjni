@@ -152,19 +152,35 @@ public class StaticJNIFrontierHeader extends StaticJNIGen {
             }
             
             for ( ArrayCallback c: helper.arrayCallbacks ) {
-            	String get_sig = accessArrayGet(c);
-            	String release_sig = accessArrayRelease(c);
-            	String length_sig = accessArrayLength(c);
+            	String get_sig = accessArrayGet(c, null);
+            	String get_sig_local = accessArrayGet(c, clazz);
+            	String release_sig = accessArrayRelease(c, null);
+            	String release_sig_local = accessArrayGet(c, clazz);
+            	String length_sig = accessArrayLength(c, null);
+            	String length_sig_local = accessArrayLength(c, clazz);
             	
             	// Get, release and length
-                pw.println( staticjniType(c.arrayType.getComponentType()) + " *" + get_sig  + "( " + staticjniType(c.arrayType) + " );" );
-                pw.println( "void " + release_sig + "( " + staticjniType(c.arrayType) + ", " + staticjniType( c.arrayType.getComponentType() ) + "* );" );
-                pw.println( "jint " + length_sig + "( " + staticjniType(c.arrayType) + " );" );
+                pw.println( staticjniType(c.arrayType.getComponentType()) + " *" + get_sig_local  + "( " + staticjniType(c.arrayType) + " );" );
+                pw.println( "#ifndef " + get_sig );
+                pw.println( "#define " + get_sig + " " + get_sig_local );
+                pw.println( "#endif" );
+                
+                pw.println( "void " + release_sig_local + "( " + staticjniType(c.arrayType) + ", " + staticjniType( c.arrayType.getComponentType() ) + "* );" );
+                pw.println( "#ifndef " + get_sig );
+                pw.println( "#define " + get_sig + " " + get_sig_local );
+                pw.println( "#endif" );
+                
+                pw.println( "jint " + length_sig_local + "( " + staticjniType(c.arrayType) + " );" );
+                pw.println( "#ifndef " + length_sig );
+                pw.println( "#define " + length_sig + " " + length_sig_local );
+                pw.println( "#endif" );
 
             	// macro structure
+                pw.println( "#ifndef " + accessArrayStructureMacro(c) );
                 pw.println( "#define " + accessArrayStructureMacro(c) + "(j,n,l) \\" );
                 pw.println( "l = " + length_sig + "( j ); \\" );
                 pw.println( "for( n = 0; n == 0? (n="+get_sig+"( j ))||1:0; " + release_sig + "( j, n ))" );
+                pw.println( "#endif" );
             }
             
             pw.println(cppGuardEnd());
