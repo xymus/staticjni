@@ -527,13 +527,13 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
             }
             
             for ( ArrayCallback c: helper.arrayCallbacks ) {
-            	String get_sig = accessArrayGet(c,null);
-            	String release_sig = accessArrayRelease(c,null);
-            	String length_sig = accessArrayLength(c,clazz);
+            	String get_sig_local = accessArrayGet(c, clazz);
+            	String release_sig_local = accessArrayRelease(c, clazz);
+            	String length_sig_local = accessArrayLength(c, clazz);
             	
             	// Get array
                 pw.println();
-                pw.println( staticjniType(c.arrayType.getComponentType()) + " *" + get_sig  + "( " + staticjniType(c.arrayType) + " value ) {" );
+                pw.println( staticjniType(c.arrayType.getComponentType()) + " *" + get_sig_local  + "( " + staticjniType(c.arrayType) + " value ) {" );
                 pw.print( "\treturn (*thread_env)->Get" );
                 pw.print( getCallTypeForReturn( c.arrayType.getComponentType() ) );
                 pw.print( "ArrayElements" );
@@ -542,7 +542,7 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
 
             	// Release array
                 pw.println();
-                pw.println( "void " + release_sig + "( " + staticjniType(c.arrayType) + " value, " + staticjniType( c.arrayType.getComponentType() ) + "* ncopy ) {" );
+                pw.println( "void " + release_sig_local + "( " + staticjniType(c.arrayType) + " value, " + staticjniType( c.arrayType.getComponentType() ) + "* ncopy ) {" );
                 pw.print( "\treturn (*thread_env)->Release" );
                 pw.print( getCallTypeForReturn( c.arrayType.getComponentType() ) );
                 pw.print( "ArrayElements" );
@@ -550,11 +550,11 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 pw.println( "};" );
 
             	// Length of array
-                String guard = "STATICJNI_GET_LENGTH_" + length_sig;
+                String guard = "STATICJNI_GET_LENGTH_" + length_sig_local;
                 pw.println( "#ifndef "+ guard );
                 pw.println( "#define "+ guard );
                 pw.println( "" );
-                pw.println( "jint " + length_sig + "( " + staticjniType(c.arrayType) + " value ) {" );
+                pw.println( "jint " + length_sig_local + "( " + staticjniType(c.arrayType) + " value ) {" );
                 pw.print( "\treturn (*thread_env)->GetArrayLength" );
                 pw.println( "( thread_env, value );");
                 pw.println( "};" );
