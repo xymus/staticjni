@@ -550,11 +550,15 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 pw.println( "};" );
 
             	// Length of array
-                pw.println();
+                String guard = "STATICJNI_GET_LENGTH_" + length_sig;
+                pw.println( "#ifndef "+ guard );
+                pw.println( "#define "+ guard );
+                pw.println( "" );
                 pw.println( "jint " + length_sig + "( " + staticjniType(c.arrayType) + " value ) {" );
                 pw.print( "\treturn (*thread_env)->GetArrayLength" );
                 pw.println( "( thread_env, value );");
                 pw.println( "};" );
+                pw.println( "#endif" );
             }
 
             pw.println(cppGuardEnd());
