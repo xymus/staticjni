@@ -102,12 +102,10 @@ public class StaticJNIStaticHeader extends StaticJNIGen {
                     pw.println(" * Class:     " + cname);
                     pw.println(" * Method:    "
                             + mangler.mangle(methodName, Mangle.Type.FIELDSTUB));
-                    pw.println(" * Signature: "
-                            + newtypesig.getTypeSignature(sig, mtr));
 
                     /*** Imported methods ***/
                     // TODO make specific to method
-                    pw.println(" * Imported methods:");
+                    pw.println(" * Available StaticJNI functions:");
                     for ( Callback c : helper.callbacks) {
                         pw.println(" *   " + normalSignature(c) );
                     }
