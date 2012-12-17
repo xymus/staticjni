@@ -89,6 +89,9 @@ public class StaticJNIClassHelper {
 
             callbacks.clear();
             fieldCallbacks.clear();
+            superCallbacks.clear();
+            constCallbacks.clear();
+            exceptionCallbacks.clear();
             arrayCallbacks.clear();
             referredTypes.clear();
             
