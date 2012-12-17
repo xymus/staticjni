@@ -15,4 +15,15 @@ public class FieldCallback {
     public String toString() {
         return "<FieldCallback " + recvType.getSimpleName() + ", " + field.getSimpleName() + ">";
     }
+    
+    @Override
+    public int hashCode() {
+    	return recvType.hashCode()*1024 + field.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+    	return this.getClass() == obj.getClass() && ((FieldCallback)obj).recvType.equals(recvType) &&
+    			((FieldCallback)obj).field.equals(field);
+    }
 }
