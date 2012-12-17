@@ -233,7 +233,7 @@ public class StaticJNIClassHelper {
                         
                         // self type
                         if (! m.getModifiers().contains(Modifier.STATIC) ) {
-                            TypeMirror t = clazz.asType();
+                            TypeMirror t = cb.recvType.asType();
                             if ( gen.advancedStaticType( t ) )
                                 referredTypes.add( t );
                         }
