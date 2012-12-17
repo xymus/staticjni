@@ -238,6 +238,26 @@ public class StaticJNIClassHelper {
                                 referredTypes.add( t );
                         }
                     }
+
+                    for ( Callback cb: constCallbacks ) {
+                        ExecutableElement m = cb.meth;
+                        
+                        TypeMirror r = gen.types.erasure(m.getReturnType());
+                        if ( gen.advancedStaticType(r) )
+                            referredTypes.add( r );
+
+                        paramargs = m.getParameters();
+                        for (VariableElement p: paramargs)  {
+                            TypeMirror t = gen.types.erasure(p.asType());
+                            if ( gen.advancedStaticType( t ) )
+                                referredTypes.add( t );
+                        }
+                        
+                        // self type
+                        TypeMirror t = cb.recvType.asType();
+                        if ( gen.advancedStaticType( t ) )
+                            referredTypes.add( t );
+                    }
                     
                     for ( FieldCallback f: fieldCallbacks ) {
                         TypeMirror t = f.recvType.asType();
