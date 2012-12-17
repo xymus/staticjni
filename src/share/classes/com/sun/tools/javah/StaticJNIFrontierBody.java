@@ -225,7 +225,7 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                     pw.println("\tjclass jclass = (*thread_env)->GetObjectClass( thread_env, "
                             + castFromStaticjni(clazz.asType(), "self") + " );");
                     pw.println("\tif ( jclass == 0 ) {");
-                    pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
+                    pw.println("\t\t(*thread_env)->FatalError( thread_env, \"Cannot find class for " + c.toString() + "\" );");
                     pw.println("\t}");
                 }
 
@@ -244,8 +244,8 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                             + newtypesig.getTypeSignature(sig, rtm) + "\" );");
                 }
                 pw.println("\tif ( jmeth == 0 ) {");
-                pw.println("\t\tfprintf( stderr, \"Cannot find method: "
-                        + m.getSimpleName().toString() + "\\n\" );");
+                pw.println("\t\t(*thread_env)->FatalError( thread_env, \"Cannot find method: "
+                        + m.getSimpleName().toString() + "\" );");
                 pw.println("\t}");
 
                 // actual call
