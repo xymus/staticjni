@@ -36,6 +36,7 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
+import com.sun.tools.javah.staticjni.ArrayCallback;
 import com.sun.tools.javah.staticjni.Callback;
 import com.sun.tools.javah.staticjni.ExceptionCallback;
 import com.sun.tools.javah.staticjni.FieldCallback;
@@ -122,6 +123,11 @@ public class StaticJNIStaticHeader extends StaticJNIGen {
                     }
                     for ( ExceptionCallback c: helper.exceptionCallbacks ) {
                         pw.println( " *   " + throwSignature( c ) );
+                    }
+                    for ( ArrayCallback c: helper.arrayCallbacks ) {
+                        pw.println( " *   jint " + accessArrayLength(c, null) + "( " + staticjniType(c.arrayType) + " array )" );
+                        pw.println( " *   " + staticjniType(c.arrayType.getComponentType()) + " *" + accessArrayGet(c,null)  + "( " + staticjniType(c.arrayType) + " array )" );
+                        pw.println( " *   void " + accessArrayRelease(c,null)  + "( " + staticjniType(c.arrayType) + " array, " + staticjniType(c.arrayType.getComponentType()) + " *narray )" );
                     }
                     pw.println(" */");
 
