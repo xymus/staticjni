@@ -307,12 +307,12 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                     pw.println("\tjfieldID jfield = (*thread_env)->GetStaticFieldID( thread_env, jclass, \""
                             + c.field.getSimpleName().toString() + "\", \"" +
                             newtypesig.getTypeSignature(types.erasure( c.field.asType()).toString())
-                            + "\" );"); // TODO correct signature!
+                            + "\" );");
                 } else {
                     pw.println("\tjfieldID jfield = (*thread_env)->GetFieldID( thread_env, jclass, \""
                             + c.field.getSimpleName().toString() + "\", \"" +
                             newtypesig.getTypeSignature(types.erasure( c.field.asType()).toString())
-                            + "\" );"); // TODO correct signature!
+                            + "\" );");
                 }
                 pw.println("\tif ( jfield == 0 ) {");
                 pw.println("\t\tfprintf( stderr, \"Cannot find field: "
@@ -367,12 +367,12 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                     pw.println("\tjfieldID jfield = (*thread_env)->GetStaticFieldID( thread_env, jclass, \""
                             + c.field.getSimpleName().toString() + "\", \"" +
                             newtypesig.getTypeSignature(types.erasure( c.field.asType()).toString())
-                            + "\" );"); // TODO correct signature!
+                            + "\" );");
                 } else {
                     pw.println("\tjfieldID jfield = (*thread_env)->GetFieldID( thread_env, jclass, \""
                             + c.field.getSimpleName().toString() + "\", \"" +
                             newtypesig.getTypeSignature(types.erasure( c.field.asType()).toString())
-                            + "\" );"); // TODO correct signature!
+                            + "\" );");
                 }
                 pw.println("\tif ( jfield == 0 ) {");
                 pw.println("\t\tfprintf( stderr, \"Cannot find field: "

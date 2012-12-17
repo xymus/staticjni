@@ -160,7 +160,6 @@ public class StaticJNIClassHelper {
                                     Object v = annotation.getElementValues().get( p ).getValue();
                                     if ( List.class.isInstance(v) )
                                         for ( Object e: (List<Object>)v ) {
-                                            // elems.getConstantExpression
                                             tryToRegisterNativeNew( clazz, md, ((AnnotationValue)e).getValue().toString(), constCallbacks );
                                         }
                                 }
