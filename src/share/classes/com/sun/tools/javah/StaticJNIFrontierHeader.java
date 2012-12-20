@@ -157,26 +157,26 @@ public class StaticJNIFrontierHeader extends StaticJNIGen {
             }
             
             for ( ArrayCallback c: helper.arrayCallbacks ) {
-            	String get_sig = accessArrayGet(c, null);
-            	String get_sig_local = accessArrayGet(c, clazz);
-            	String release_sig = accessArrayRelease(c, null);
-            	String release_sig_local = accessArrayRelease(c, clazz);
-            	String length_sig = accessArrayLength(c, null);
-            	String length_sig_local = accessArrayLength(c, clazz);
             	
             	// Get
+            	String get_sig = accessArrayGet(c, null);
+            	String get_sig_local = accessArrayGet(c, clazz);
                 pw.println( staticjniType(c.arrayType.getComponentType()) + " *" + get_sig_local  + "( " + staticjniType(c.arrayType) + " );" );
                 pw.println( "#ifndef " + get_sig );
                 pw.println( "#define " + get_sig + " " + get_sig_local );
                 pw.println( "#endif" );
                 
                 // Release
+            	String release_sig = accessArrayRelease(c, null);
+            	String release_sig_local = accessArrayRelease(c, clazz);
                 pw.println( "void " + release_sig_local + "( " + staticjniType(c.arrayType) + ", " + staticjniType( c.arrayType.getComponentType() ) + "* );" );
                 pw.println( "#ifndef " + release_sig );
                 pw.println( "#define " + release_sig + " " + release_sig_local );
                 pw.println( "#endif" );
                 
                 // Length
+            	String length_sig = accessArrayLength(c, null);
+            	String length_sig_local = accessArrayLength(c, clazz);
                 pw.println( "jint " + length_sig_local + "( " + staticjniType(c.arrayType) + " );" );
                 pw.println( "#ifndef " + length_sig );
                 pw.println( "#define " + length_sig + " " + length_sig_local );
