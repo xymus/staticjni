@@ -217,65 +217,65 @@ public class StaticJNIClassHelper {
                     for ( TypeMirror t : md.getThrownTypes() ) {
                     	exceptionCallbacks.add( new ExceptionCallback(t) );
                     }
-                    
-                    // RuntimeExcpetion is always available
-                    TypeElement eRuntimeEx = gen.elems.getTypeElement("java.lang.RuntimeException");
-                    TypeMirror tRuntimeEx = eRuntimeEx.asType();
-                    exceptionCallbacks.add( new ExceptionCallback(tRuntimeEx) );
-                    
-                    // Scan imports for types
-                    for ( Callback cb: callbacks ) {
-                        ExecutableElement m = cb.meth;
-                        
-                        TypeMirror r = gen.types.erasure(m.getReturnType());
-                        if ( gen.advancedStaticType(r) )
-                            referredTypes.add( r );
-
-                        paramargs = m.getParameters();
-                        for (VariableElement p: paramargs)  {
-                            TypeMirror t = gen.types.erasure(p.asType());
-                            if ( gen.advancedStaticType( t ) )
-                                referredTypes.add( t );
-                        }
-                        
-                        // self type
-                        if (! m.getModifiers().contains(Modifier.STATIC) ) {
-                            TypeMirror t = cb.recvType.asType();
-                            if ( gen.advancedStaticType( t ) )
-                                referredTypes.add( t );
-                        }
-                    }
-
-                    for ( Callback cb: constCallbacks ) {
-                        ExecutableElement m = cb.meth;
-                        
-                        TypeMirror r = gen.types.erasure(m.getReturnType());
-                        if ( gen.advancedStaticType(r) )
-                            referredTypes.add( r );
-
-                        paramargs = m.getParameters();
-                        for (VariableElement p: paramargs)  {
-                            TypeMirror t = gen.types.erasure(p.asType());
-                            if ( gen.advancedStaticType( t ) )
-                                referredTypes.add( t );
-                        }
-                        
-                        // self type
-                        TypeMirror t = cb.recvType.asType();
-                        if ( gen.advancedStaticType( t ) )
-                            referredTypes.add( t );
-                    }
-                    
-                    for ( FieldCallback f: fieldCallbacks ) {
-                        TypeMirror t = f.recvType.asType();
-                        if ( gen.advancedStaticType(t) )
-                            referredTypes.add( t );
-                        
-                        t = f.field.asType();
-                        if ( gen.advancedStaticType(t) )
-                            referredTypes.add( t );
-                    }
                 }
+            }
+                    
+            // RuntimeExcpetion is always available
+            TypeElement eRuntimeEx = gen.elems.getTypeElement("java.lang.RuntimeException");
+            TypeMirror tRuntimeEx = eRuntimeEx.asType();
+            exceptionCallbacks.add( new ExceptionCallback(tRuntimeEx) );
+            
+            // Scan imports for types
+            for ( Callback cb: callbacks ) {
+                ExecutableElement m = cb.meth;
+                
+                TypeMirror r = gen.types.erasure(m.getReturnType());
+                if ( gen.advancedStaticType(r) )
+                    referredTypes.add( r );
+
+                List<? extends VariableElement> paramargs = m.getParameters();
+                for (VariableElement p: paramargs)  {
+                    TypeMirror t = gen.types.erasure(p.asType());
+                    if ( gen.advancedStaticType( t ) )
+                        referredTypes.add( t );
+                }
+                
+                // self type
+                if (! m.getModifiers().contains(Modifier.STATIC) ) {
+                    TypeMirror t = cb.recvType.asType();
+                    if ( gen.advancedStaticType( t ) )
+                        referredTypes.add( t );
+                }
+            }
+
+            for ( Callback cb: constCallbacks ) {
+                ExecutableElement m = cb.meth;
+                
+                TypeMirror r = gen.types.erasure(m.getReturnType());
+                if ( gen.advancedStaticType(r) )
+                    referredTypes.add( r );
+
+                List<? extends VariableElement> paramargs = m.getParameters();
+                for (VariableElement p: paramargs)  {
+                    TypeMirror t = gen.types.erasure(p.asType());
+                    if ( gen.advancedStaticType( t ) )
+                        referredTypes.add( t );
+                }
+                
+                // self type
+                TypeMirror t = cb.recvType.asType();
+                if ( gen.advancedStaticType( t ) )
+                    referredTypes.add( t );
+            }
+            
+            for ( FieldCallback f: fieldCallbacks ) {
+                TypeMirror t = f.recvType.asType();
+                if ( gen.advancedStaticType(t) )
+                    referredTypes.add( t );
+                
+                t = f.field.asType();
+                if ( gen.advancedStaticType(t) )
+                    referredTypes.add( t );
             }
         }
     }
