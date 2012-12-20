@@ -40,6 +40,7 @@ import javax.lang.model.util.ElementFilter;
 import com.sun.tools.javah.Util.Exit;
 import com.sun.tools.javah.staticjni.ArrayCallback;
 import com.sun.tools.javah.staticjni.Callback;
+import com.sun.tools.javah.staticjni.ExceptionCallback;
 import com.sun.tools.javah.staticjni.FieldCallback;
 
 
@@ -149,6 +150,10 @@ public class StaticJNIFrontierHeader extends StaticJNIGen {
             
             for ( Callback c: helper.constCallbacks ) {
                 pw.println( constructorSignature( c ) + ";" );
+            }
+            
+            for ( ExceptionCallback c: helper.exceptionCallbacks ) {
+                pw.println( throwSignature( c ) + ";" );
             }
             
             for ( ArrayCallback c: helper.arrayCallbacks ) {
