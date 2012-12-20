@@ -27,7 +27,7 @@ public class ExceptionTest {
 		}
 	}
 	
-	native void ExceptionProne() throws MyException, RuntimeException;
+	native void ExceptionProne() throws MyException;
 	
-	native void RuntimeExceptionProne() throws RuntimeException;
+	native void RuntimeExceptionProne();
 }

@@ -218,6 +218,11 @@ public class StaticJNIClassHelper {
                     	exceptionCallbacks.add( new ExceptionCallback(t) );
                     }
                     
+                    // RuntimeExcpetion is always available
+                    TypeElement eRuntimeEx = gen.elems.getTypeElement("java.lang.RuntimeException");
+                    TypeMirror tRuntimeEx = eRuntimeEx.asType();
+                    exceptionCallbacks.add( new ExceptionCallback(tRuntimeEx) );
+                    
                     // Scan imports for types
                     for ( Callback cb: callbacks ) {
                         ExecutableElement m = cb.meth;
