@@ -527,11 +527,13 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
             }
             
             for ( ArrayCallback c: helper.arrayCallbacks ) {
-            	String get_sig_local = accessArrayGet(c, clazz);
-            	String release_sig_local = accessArrayRelease(c, clazz);
+            	String get_sig_local = accessArrayGet(c, clazz,false);
+            	String release_sig_local = accessArrayRelease(c, clazz,false);
             	String length_sig_local = accessArrayLength(c, clazz);
             	
-            	// Get array
+                String guard = "STATICJNI_ARRAY_" + staticjniType(c.arrayType);
+            	
+            	// Get array basic
                 pw.println();
                 pw.println( staticjniType(c.arrayType.getComponentType()) + " *" + get_sig_local  + "( " + staticjniType(c.arrayType) + " value ) {" );
                 pw.print( "\treturn (*thread_env)->Get" );
@@ -540,7 +542,27 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 pw.println( "( thread_env, value, NULL );");
                 pw.println( "};" );
 
-            	// Release array
+            	// Release array basic
+                pw.println();
+                pw.println( "void " + release_sig_local + "( " + staticjniType(c.arrayType) + " value, " + staticjniType( c.arrayType.getComponentType() ) + "* ncopy ) {" );
+                pw.print( "\treturn (*thread_env)->Release" );
+                pw.print( getCallTypeForReturn( c.arrayType.getComponentType() ) );
+                pw.print( "ArrayElements" );
+                pw.println( "( thread_env, value, ncopy, 0 );");
+                pw.println( "};" );
+
+            	// Get array critical
+            	get_sig_local = accessArrayGet(c, clazz,true);
+                pw.println();
+                pw.println( staticjniType(c.arrayType.getComponentType()) + " *" + get_sig_local  + "( " + staticjniType(c.arrayType) + " value ) {" );
+                pw.print( "\treturn (*thread_env)->Get" );
+                pw.print( getCallTypeForReturn( c.arrayType.getComponentType() ) );
+                pw.print( "ArrayElements" );
+                pw.println( "( thread_env, value, NULL );");
+                pw.println( "};" );
+
+            	// Release array critical
+            	release_sig_local = accessArrayRelease(c, clazz,true);
                 pw.println();
                 pw.println( "void " + release_sig_local + "( " + staticjniType(c.arrayType) + " value, " + staticjniType( c.arrayType.getComponentType() ) + "* ncopy ) {" );
                 pw.print( "\treturn (*thread_env)->Release" );
@@ -550,7 +572,6 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 pw.println( "};" );
 
             	// Length of array
-                String guard = "STATICJNI_GET_LENGTH_" + length_sig_local;
                 pw.println( "#ifndef "+ guard );
                 pw.println( "#define "+ guard );
                 pw.println( "" );
@@ -558,6 +579,24 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 pw.print( "\treturn (*thread_env)->GetArrayLength" );
                 pw.println( "( thread_env, value );");
                 pw.println( "};" );
+
+                // New
+            	String new_sig_local = newArray(c, clazz);
+                pw.println( staticjniType(c.arrayType) + " " + new_sig_local + "( jsize size ) {" );
+                pw.print( "\treturn (*thread_env)->New" );
+                pw.print( getCallTypeForReturn( c.arrayType.getComponentType() ) );
+                pw.println( "Array( thread_env, size );");
+                pw.println( "};" );
+                
+                // Set region
+            	String set_region_local = setArrayRegion(c, clazz);
+                pw.println( "void " + set_region_local + "( " + staticjniType(c.arrayType) + " arr, jsize start, jsize len, " + 
+                		staticjniType(c.arrayType.getComponentType()) + " *value ) {" );
+                pw.print( "\t(*thread_env)->Set" );
+                pw.print( getCallTypeForReturn( c.arrayType.getComponentType() ) );
+                pw.println( "ArrayRegion( thread_env, arr, start, len, value );");
+                pw.println( "};" );
+                
                 pw.println( "#endif" );
             }
             

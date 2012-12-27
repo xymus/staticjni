@@ -311,29 +311,31 @@ public abstract class StaticJNIGen extends JNI {
         return "void throw_new_"+t.getSimpleName()+"( const char* msg )";
     }
     
-    String accessArrayStructureMacro(ArrayCallback c) {
+    /* Arrays */
+    
+    String accessArrayStructureMacro(ArrayCallback c, boolean critical) {
         StringBuffer sb = new StringBuffer();
-        if ( c.critical ) sb.append( "critical_" );
+        if ( critical ) sb.append( "critical_" );
         sb.append( "access_");
         sb.append( staticjniType( c.arrayType ) );
     	return sb.toString();
     }
     
-    String accessArrayGet(ArrayCallback c, TypeElement from) {
+    String accessArrayGet(ArrayCallback c, TypeElement from, boolean critical) {
         StringBuffer sb = new StringBuffer();
         if ( from != null ) sb.append( from.getSimpleName() + "_" );
         sb.append( "get_");
-        if ( c.critical ) sb.append( "critical_" );
+        if ( critical ) sb.append( "critical_" );
         sb.append( "access_");
         sb.append( staticjniType( c.arrayType ) );
     	return sb.toString();
     }
     
-    String accessArrayRelease(ArrayCallback c, TypeElement from) {
+    String accessArrayRelease(ArrayCallback c, TypeElement from, boolean critical) {
         StringBuffer sb = new StringBuffer();
         if ( from != null ) sb.append( from.getSimpleName() + "_" );
         sb.append( "release_");
-        if ( c.critical ) sb.append( "critical_" );
+        if ( critical ) sb.append( "critical_" );
         sb.append( "access_");
         sb.append( staticjniType( c.arrayType ) );
     	return sb.toString();

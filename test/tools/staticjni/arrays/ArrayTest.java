@@ -1,9 +1,5 @@
 package arrays;
 
-import net.xymus.staticjni.NativeArrayAccess;
-import net.xymus.staticjni.NativeArrayAccessCritical;
-import net.xymus.staticjni.NativeCall;
-
 public class ArrayTest {
 	
 	int[] int_array = { 8, 1, 2, 3, 4 };
@@ -19,13 +15,10 @@ public class ArrayTest {
 		PlayWithArrayCritical( int_array );
 	}
 	
-	@NativeArrayAccess( "int[]" )
 	native void PlayWithArrayManually( int[] int_array );
 	
-	@NativeArrayAccess( "int[]" )
 	native void PlayWithArrayMacro( int[] int_array );
 	
-	@NativeArrayAccessCritical( "int[]" )
 	native void PlayWithArrayCritical( int[] int_array );
 
 	static {

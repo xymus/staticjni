@@ -159,22 +159,6 @@ public class StaticJNIFrontierHeader extends StaticJNIGen {
             }
             
             for ( ArrayCallback c: helper.arrayCallbacks ) {
-            	
-            	// Get
-            	String get_sig = accessArrayGet(c, null);
-            	String get_sig_local = accessArrayGet(c, clazz);
-                pw.println( staticjniType(c.arrayType.getComponentType()) + " *" + get_sig_local  + "( " + staticjniType(c.arrayType) + " );" );
-                pw.println( "#ifndef " + get_sig );
-                pw.println( "#define " + get_sig + " " + get_sig_local );
-                pw.println( "#endif" );
-                
-                // Release
-            	String release_sig = accessArrayRelease(c, null);
-            	String release_sig_local = accessArrayRelease(c, clazz);
-                pw.println( "void " + release_sig_local + "( " + staticjniType(c.arrayType) + ", " + staticjniType( c.arrayType.getComponentType() ) + "* );" );
-                pw.println( "#ifndef " + release_sig );
-                pw.println( "#define " + release_sig + " " + release_sig_local );
-                pw.println( "#endif" );
                 
                 // Length
             	String length_sig = accessArrayLength(c, null);
@@ -183,13 +167,71 @@ public class StaticJNIFrontierHeader extends StaticJNIGen {
                 pw.println( "#ifndef " + length_sig );
                 pw.println( "#define " + length_sig + " " + length_sig_local );
                 pw.println( "#endif" );
+            	
+            	// Get
+            	String get_sig = accessArrayGet(c, null, false);
+            	String get_sig_local = accessArrayGet(c, clazz, false);
+                pw.println( staticjniType(c.arrayType.getComponentType()) + " *" + get_sig_local  + "( " + staticjniType(c.arrayType) + " );" );
+                pw.println( "#ifndef " + get_sig );
+                pw.println( "#define " + get_sig + " " + get_sig_local );
+                pw.println( "#endif" );
+                
+                // Release
+            	String release_sig = accessArrayRelease(c, null, false);
+            	String release_sig_local = accessArrayRelease(c, clazz, false);
+                pw.println( "void " + release_sig_local + "( " + staticjniType(c.arrayType) + ", " + staticjniType( c.arrayType.getComponentType() ) + "* );" );
+                pw.println( "#ifndef " + release_sig );
+                pw.println( "#define " + release_sig + " " + release_sig_local );
+                pw.println( "#endif" );
 
             	// macro structure
-                pw.println( "#ifndef " + accessArrayStructureMacro(c) );
-                pw.println( "#define " + accessArrayStructureMacro(c) + "(j,n,l) \\" );
+                pw.println( "#ifndef " + accessArrayStructureMacro(c,false) );
+                pw.println( "#define " + accessArrayStructureMacro(c,false) + "(j,n,l) \\" );
                 pw.println( "l = " + length_sig + "( j ); \\" );
                 pw.println( "for( n = 0; n == 0? (n="+get_sig+"( j ))||1:0; " + release_sig + "( j, n ))" );
                 pw.println( "#endif" );
+
+            	// Get critical
+            	get_sig = accessArrayGet(c, null, true);
+            	get_sig_local = accessArrayGet(c, clazz, true);
+                pw.println( staticjniType(c.arrayType.getComponentType()) + " *" + get_sig_local  + "( " + staticjniType(c.arrayType) + " );" );
+                pw.println( "#ifndef " + get_sig );
+                pw.println( "#define " + get_sig + " " + get_sig_local );
+                pw.println( "#endif" );
+                
+                // Release critical
+            	release_sig = accessArrayRelease(c, null, true);
+            	release_sig_local = accessArrayRelease(c, clazz, true);
+                pw.println( "void " + release_sig_local + "( " + staticjniType(c.arrayType) + ", " + staticjniType( c.arrayType.getComponentType() ) + "* );" );
+                pw.println( "#ifndef " + release_sig );
+                pw.println( "#define " + release_sig + " " + release_sig_local );
+                pw.println( "#endif" );
+
+            	// macro structure critical
+                pw.println( "#ifndef " + accessArrayStructureMacro(c,true) );
+                pw.println( "#define " + accessArrayStructureMacro(c,true) + "(j,n,l) \\" );
+                pw.println( "l = " + length_sig + "( j ); \\" );
+                pw.println( "for( n = 0; n == 0? (n="+get_sig+"( j ))||1:0; " + release_sig + "( j, n ))" );
+                pw.println( "#endif" );
+                
+                // New
+            	String new_sig = newArray(c, null);
+            	String new_sig_local = newArray(c, clazz);
+                pw.println( staticjniType(c.arrayType) + " " + new_sig_local + "( jsize size );" );
+                pw.println( "#ifndef " + new_sig );
+                pw.println( "#define " + new_sig + " " + new_sig_local );
+                pw.println( "#endif" );
+                
+                // Set region
+            	String set_region_sig = setArrayRegion(c, null);
+            	String set_region_local = setArrayRegion(c, clazz);
+                pw.println( "void " + set_region_local + "( " + staticjniType(c.arrayType) + " arr, jsize start, jsize len, " + 
+                		staticjniType(c.arrayType.getComponentType()) + " *value );" );
+                pw.println( "#ifndef " + set_region_sig );
+                pw.println( "#define " + set_region_sig + " " + set_region_local );
+                pw.println( "#endif" );
+            }
+            
             if ( helper.usesString ) {
             	String get_sig_local = accessStringGet(clazz);
             	String release_sig_local = accessStringRelease(clazz);

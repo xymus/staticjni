@@ -4,14 +4,12 @@ import javax.lang.model.type.ArrayType;
 
 public class ArrayCallback {
 	public ArrayType arrayType;
-	public boolean critical;
 
-    public ArrayCallback( ArrayType t, boolean critical ) {
+    public ArrayCallback( ArrayType t ) {
     	this.arrayType = t;
-    	this.critical = critical;
     }
     public String toString() {
-        return "<ArrayAccess " + arrayType.toString() + " " + critical + ">";
+        return "<ArrayAccess " + arrayType.toString() + ">";
     }
     
     @Override
@@ -22,7 +20,6 @@ public class ArrayCallback {
     @Override
     public boolean equals(Object obj) {
     	return this.getClass() == obj.getClass() &&
-    			((ArrayCallback)obj).arrayType.equals(arrayType) &&
-    			((ArrayCallback)obj).critical == critical;
+    			((ArrayCallback)obj).arrayType.equals(arrayType);
     }
 }

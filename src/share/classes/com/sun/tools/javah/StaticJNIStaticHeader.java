@@ -124,8 +124,8 @@ public class StaticJNIStaticHeader extends StaticJNIGen {
                     }
                     for ( ArrayCallback c: helper.arrayCallbacks ) {
                         pw.println( " *   jint " + accessArrayLength(c, null) + "( " + staticjniType(c.arrayType) + " array )" );
-                        pw.println( " *   " + staticjniType(c.arrayType.getComponentType()) + " *" + accessArrayGet(c,null)  + "( " + staticjniType(c.arrayType) + " array )" );
-                        pw.println( " *   void " + accessArrayRelease(c,null)  + "( " + staticjniType(c.arrayType) + " array, " + staticjniType(c.arrayType.getComponentType()) + " *narray )" );
+                        pw.println( " *   " + staticjniType(c.arrayType.getComponentType()) + " *" + accessArrayGet(c,null,false)  + "( " + staticjniType(c.arrayType) + " array )" );
+                        pw.println( " *   void " + accessArrayRelease(c,null,false)  + "( " + staticjniType(c.arrayType) + " array, " + staticjniType(c.arrayType.getComponentType()) + " *narray )" );
                     }
                     pw.println(" */");
 

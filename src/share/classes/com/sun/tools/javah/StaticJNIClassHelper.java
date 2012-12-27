@@ -172,46 +172,6 @@ public class StaticJNIClassHelper {
                         if ( str.equals( NativeSuperCall.class.getCanonicalName() ) ) {
                             superCallbacks.add( new Callback(clazz, md) );
                         }
-                        
-                        // arrays
-                        if ( str.equals( NativeArrayAccess.class.getCanonicalName() ) ) {
-                            for ( ExecutableElement p: annotation.getElementValues().keySet() )
-                                if ( p.getSimpleName().toString().equals( "value" ) ) {
-                                    Object v = annotation.getElementValues().get( p ).getValue();
-                                    if ( String.class.isInstance(v) )
-                                    	tryToRegisterNativeArrayAccess( clazz, md, v.toString(), arrayCallbacks, false );
-                                }
-                        }
-                        if ( str.equals( NativeArrayAccesses.class.getCanonicalName() ) ) {
-                            for ( ExecutableElement p: annotation.getElementValues().keySet() )
-                                if ( p.getSimpleName().toString().equals( "value" ) ) {
-                                    Object v = annotation.getElementValues().get( p ).getValue();
-                                    if ( List.class.isInstance(v) )
-                                        for ( Object e: (List<Object>)v ) {
-                                            tryToRegisterNativeArrayAccess( clazz, md, ((AnnotationValue)e).getValue().toString(), arrayCallbacks, false );
-                                        }
-                                }
-                        }
-                        
-                        // arrays critical
-                        if ( str.equals( NativeArrayAccessCritical.class.getCanonicalName() ) ) {
-                            for ( ExecutableElement p: annotation.getElementValues().keySet() )
-                                if ( p.getSimpleName().toString().equals( "value" ) ) {
-                                    Object v = annotation.getElementValues().get( p ).getValue();
-                                    if ( String.class.isInstance(v) )
-                                    	tryToRegisterNativeArrayAccess( clazz, md, v.toString(), arrayCallbacks, true );
-                                }
-                        }
-                        if ( str.equals( NativeArrayAccessesCritical.class.getCanonicalName() ) ) {
-                            for ( ExecutableElement p: annotation.getElementValues().keySet() )
-                                if ( p.getSimpleName().toString().equals( "value" ) ) {
-                                    Object v = annotation.getElementValues().get( p ).getValue();
-                                    if ( List.class.isInstance(v) )
-                                        for ( Object e: (List<Object>)v ) {
-                                            tryToRegisterNativeArrayAccess( clazz, md, ((AnnotationValue)e).getValue().toString(), arrayCallbacks, true );
-                                        }
-                                }
-                        }
                     }
                     
                     // check possible throw from the throws keyword
@@ -274,10 +234,16 @@ public class StaticJNIClassHelper {
             // scan types for special needs
             TypeElement jString = gen.elems.getTypeElement("java.lang.String");
             for ( TypeMirror c: referredTypes ) {
-            	if ( gen.types.asElement(c).equals(jString) ) {
+            	TypeKind kind = c.getKind();
+            	if (kind == TypeKind.ARRAY) {
+                    arrayCallbacks.add(new ArrayCallback((ArrayType)c));
+                }
+            	else if ( kind == TypeKind.DECLARED ) {
+            		if ( gen.types.asElement(c).equals(jString) ) {
             		// String is in use
             		usesString = true;
             		break;
+            		}
             	}
             }
         }
@@ -348,30 +314,6 @@ public class StaticJNIClassHelper {
             return;
         }
         
-        gen.util.error("err.staticjni.methnotfound", name, from );
-    }
-    
-    void tryToRegisterNativeArrayAccess(TypeElement clazz, ExecutableElement from_meth, 
-            String name, Set<ArrayCallback> callbacks, boolean critical ) {
-        TypeElement from_clazz = clazz;
-        String from = from_clazz.toString() + "." + from_meth.toString();
-        
-        int p = name.lastIndexOf("[]");
-        if ( p == -1 ) {
-            gen.util.error("err.staticjni.arrayformatinvalid", name );
-            return;
-        }
-
-    	// find class
-        TypeMirror t = javaNameToType( name );
-        
-        if ( t != null ) {
-            callbacks.add(new ArrayCallback((ArrayType)t, critical ));
-            return;
-        } else {
-            gen.util.error("err.staticjni.classnotfound", name, from );
-        }
-
         gen.util.error("err.staticjni.methnotfound", name, from );
     }
     
