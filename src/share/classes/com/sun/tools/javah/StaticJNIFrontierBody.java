@@ -503,7 +503,7 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
             }
             
             for ( ExceptionCallback c: helper.exceptionCallbacks ) {
-            	String signature = throwSignature( c );
+            	String signature = throwSignature( c, clazz, true );
             	
             	String guard = "STATICJNI_THROW_" + types.asElement(c.exceptionType).getSimpleName();
             	pw.println( "#ifndef " + guard );

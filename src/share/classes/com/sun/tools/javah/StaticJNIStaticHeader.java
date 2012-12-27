@@ -120,7 +120,7 @@ public class StaticJNIStaticHeader extends StaticJNIGen {
                         pw.println(" *   " + constructorSignature(c) );
                     }
                     for ( ExceptionCallback c: helper.exceptionCallbacks ) {
-                        pw.println( " *   " + throwSignature( c ) );
+                        pw.println( " *   " + throwSignature( c, null, true ) );
                     }
                     for ( ArrayCallback c: helper.arrayCallbacks ) {
                         pw.println( " *   jint " + accessArrayLength(c, null) + "( " + staticjniType(c.arrayType) + " array )" );

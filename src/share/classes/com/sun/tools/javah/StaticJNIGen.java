@@ -306,9 +306,14 @@ public abstract class StaticJNIGen extends JNI {
         return sb.toString();
     }
     
-    String throwSignature(ExceptionCallback e) {
+    String throwSignature(ExceptionCallback e, TypeElement from, boolean full) {
     	TypeElement t = (TypeElement)types.asElement(e.exceptionType);
-        return "void throw_new_"+t.getSimpleName()+"( const char* msg )";
+        StringBuffer sb = new StringBuffer();
+        if ( full  ) sb.append( "void " );
+        if ( from != null ) sb.append( from.getSimpleName() + "_" );
+        sb.append( "throw_new_"+t.getSimpleName() );
+        if ( full  ) sb.append( "( const char* msg )" );
+        return sb.toString();
     }
     
     /* Arrays */

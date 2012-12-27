@@ -155,7 +155,14 @@ public class StaticJNIFrontierHeader extends StaticJNIGen {
             }
             
             for ( ExceptionCallback c: helper.exceptionCallbacks ) {
-                pw.println( throwSignature( c ) + ";" );
+            	TypeElement t = (TypeElement)types.asElement(c.exceptionType);
+            	String throw_sig = throwSignature(c, null, false);
+            	String throw_sig_local = throwSignature(c, clazz, false);
+            	
+                pw.println( throwSignature( c, clazz, true ) + ";" );
+                pw.println( "#ifndef " + throw_sig );
+                pw.println( "#define " + throw_sig + " " + throw_sig_local );
+                pw.println( "#endif" );
             }
             
             for ( ArrayCallback c: helper.arrayCallbacks ) {
