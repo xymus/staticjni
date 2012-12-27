@@ -105,22 +105,19 @@ public class StaticJNIClassHelper {
                     TypeMirror mtr = gen.types.erasure(md.getReturnType());
                     
                     // return type
-                    if ( gen.advancedStaticType( mtr ) )
-                        referredTypes.add( mtr );
+                    referredTypes.add( mtr );
                     
                     // params type
                     List<? extends VariableElement> paramargs = md.getParameters();
                     for (VariableElement p: paramargs)  {
                         TypeMirror t = gen.types.erasure(p.asType());
-                        if ( gen.advancedStaticType( t ) )
-                            referredTypes.add( t );
+                        referredTypes.add( t );
                     }
                     
                     // self type
                     if (! md.getModifiers().contains(Modifier.STATIC) ) {
                         TypeMirror t = clazz.asType();
-                        if ( gen.advancedStaticType( t ) )
-                            referredTypes.add( t );
+                        referredTypes.add( t );
                     }
                     
                     // scan annotations for NativeCalls
@@ -233,22 +230,19 @@ public class StaticJNIClassHelper {
             for ( Callback cb: callbacks ) {
                 ExecutableElement m = cb.meth;
                 
-                TypeMirror r = gen.types.erasure(m.getReturnType());
-                if ( gen.advancedStaticType(r) )
-                    referredTypes.add( r );
+                TypeMirror r = m.getReturnType();
+                referredTypes.add( r );
 
                 List<? extends VariableElement> paramargs = m.getParameters();
                 for (VariableElement p: paramargs)  {
-                    TypeMirror t = gen.types.erasure(p.asType());
-                    if ( gen.advancedStaticType( t ) )
-                        referredTypes.add( t );
+                    TypeMirror t = p.asType();
+                    referredTypes.add( t );
                 }
                 
                 // self type
                 if (! m.getModifiers().contains(Modifier.STATIC) ) {
                     TypeMirror t = cb.recvType.asType();
-                    if ( gen.advancedStaticType( t ) )
-                        referredTypes.add( t );
+                    referredTypes.add( t );
                 }
             }
 
@@ -256,30 +250,25 @@ public class StaticJNIClassHelper {
                 ExecutableElement m = cb.meth;
                 
                 TypeMirror r = gen.types.erasure(m.getReturnType());
-                if ( gen.advancedStaticType(r) )
-                    referredTypes.add( r );
+                referredTypes.add( r );
 
                 List<? extends VariableElement> paramargs = m.getParameters();
                 for (VariableElement p: paramargs)  {
                     TypeMirror t = gen.types.erasure(p.asType());
-                    if ( gen.advancedStaticType( t ) )
-                        referredTypes.add( t );
+                    referredTypes.add( t );
                 }
                 
                 // self type
                 TypeMirror t = cb.recvType.asType();
-                if ( gen.advancedStaticType( t ) )
-                    referredTypes.add( t );
+                referredTypes.add( t );
             }
             
             for ( FieldCallback f: fieldCallbacks ) {
                 TypeMirror t = f.recvType.asType();
-                if ( gen.advancedStaticType(t) )
-                    referredTypes.add( t );
+                referredTypes.add( t );
                 
                 t = f.field.asType();
-                if ( gen.advancedStaticType(t) )
-                    referredTypes.add( t );
+                referredTypes.add( t );
             }
             
             // scan types for special needs

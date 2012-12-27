@@ -124,14 +124,16 @@ public class StaticJNIFrontierHeader extends StaticJNIGen {
             // Write referred types
             pw.println();
             for ( TypeMirror t: helper.referredTypes ) {
-                String tname = types.asElement(t).getSimpleName().toString();
-                pw.println( "#ifndef STATICJNI_TYPE_" + tname );
-                pw.println( "#define STATICJNI_TYPE_" + tname );
-                pw.println( "typedef struct s_" + tname + " {" );
-                pw.println( "\tjobject val;" );
-                pw.println( "} *" + tname + ";" );
-                pw.println( "#endif" );
-                pw.println();
+                if ( helper.gen.advancedStaticType( t ) ) {
+	                String tname = types.asElement(t).getSimpleName().toString();
+	                pw.println( "#ifndef STATICJNI_TYPE_" + tname );
+	                pw.println( "#define STATICJNI_TYPE_" + tname );
+	                pw.println( "typedef struct s_" + tname + " {" );
+	                pw.println( "\tjobject val;" );
+	                pw.println( "} *" + tname + ";" );
+	                pw.println( "#endif" );
+	                pw.println();
+                }
             }
             
             // Write callback signatures
