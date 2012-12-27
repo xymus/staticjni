@@ -350,9 +350,7 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 	if ( c.recvType.getEnclosingElement().getKind() == ElementKind.CLASS ) { // TODO try all levels
                 		int i = qname.lastIndexOf('/');
                 		qname = qname.substring(0,i) + "$" + qname.substring(i+1);
-                		System.out.println( "TOP_LEVEL" );
                 	}
-            		System.out.println( qname );
                     pw.println("\tjclass jclass = (*thread_env)->FindClass( thread_env, \""
                             + qname + "\" );");
                 } else {
