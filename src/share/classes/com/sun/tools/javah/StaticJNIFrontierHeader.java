@@ -188,6 +188,89 @@ public class StaticJNIFrontierHeader extends StaticJNIGen {
                 pw.println( "l = " + length_sig + "( j ); \\" );
                 pw.println( "for( n = 0; n == 0? (n="+get_sig+"( j ))||1:0; " + release_sig + "( j, n ))" );
                 pw.println( "#endif" );
+            if ( helper.usesString ) {
+            	String get_sig_local = accessStringGet(clazz);
+            	String release_sig_local = accessStringRelease(clazz);
+            	String length_sig_local = accessStringLength(clazz);
+            	String get_sig = accessStringGet(null);
+            	String release_sig = accessStringRelease(null);
+            	String length_sig = accessStringLength(null);
+            	
+            	/** unicode **/
+            	
+            	// Get unicode
+                pw.println( "jchar *" + get_sig_local  + "( jstring );" );
+                pw.println( "#ifndef " + get_sig );
+                pw.println( "#define " + get_sig + " " + get_sig_local );
+                pw.println( "#endif" );
+                
+                // Release unicode
+                pw.println( "void " + release_sig_local + "( jstring, const jchar* );" );
+                pw.println( "#ifndef " + release_sig );
+                pw.println( "#define " + release_sig + " " + release_sig_local );
+                pw.println( "#endif" );
+                
+                // Length unicode
+                pw.println( "jint " + length_sig_local + "( jstring );" );
+                pw.println( "#ifndef " + length_sig );
+                pw.println( "#define " + length_sig + " " + length_sig_local );
+                pw.println( "#endif" );
+                
+                // New unicode
+            	String new_sig = newString(null);
+            	String new_sig_local = newString(clazz);
+                pw.println( "jstring " + new_sig_local + "( const jchar* src, jsize size );" );
+                pw.println( "#ifndef " + new_sig );
+                pw.println( "#define " + new_sig + " " + new_sig_local );
+                pw.println( "#endif" );
+
+            	// macro structure unicode
+                pw.println( "#ifndef " + accessStringStructureMacro() );
+                pw.println( "#define " + accessStringStructureMacro() + "(j,n,l) \\" );
+                pw.println( "l = " + length_sig + "( j ); \\" );
+                pw.println( "for( n = 0; n == 0? (n="+get_sig+"( j ))||1:0; " + release_sig + "( j, n ))" );
+                pw.println( "#endif" );
+            	
+            	/** utf8 **/
+            	
+            	// Get utf8
+            	get_sig_local = get_sig_local + "_utf8";
+            	get_sig = get_sig + "_utf8";
+                pw.println( "jchar *" + get_sig_local  + "( jstring );" );
+                pw.println( "#ifndef " + get_sig );
+                pw.println( "#define " + get_sig + " " + get_sig_local );
+                pw.println( "#endif" );
+                
+                // Release utf8
+                release_sig_local = release_sig_local + "_utf8";
+            	release_sig = release_sig + "_utf8";
+                pw.println( "void " + release_sig_local + "( jstring, jchar* );" );
+                pw.println( "#ifndef " + release_sig );
+                pw.println( "#define " + release_sig + " " + release_sig_local );
+                pw.println( "#endif" );
+                
+                // Length utf8
+            	length_sig_local = length_sig_local + "_utf8";
+            	length_sig = length_sig + "_utf8";
+                pw.println( "jint " + length_sig_local + "( jstring );" );
+                pw.println( "#ifndef " + length_sig );
+                pw.println( "#define " + length_sig + " " + length_sig_local );
+                pw.println( "#endif" );
+                
+                // New utf8
+            	new_sig = new_sig + "_utf8";
+            	new_sig_local = new_sig_local + "_utf8";
+                pw.println( "jstring " + new_sig_local + "( const jchar* src, jsize size );" );
+                pw.println( "#ifndef " + new_sig );
+                pw.println( "#define " + new_sig + " " + new_sig_local );
+                pw.println( "#endif" );
+
+            	// macro structure utf8
+                pw.println( "#ifndef " + accessStringStructureMacro() + "_utf8" );
+                pw.println( "#define " + accessStringStructureMacro() + "_utf8(j,n,l) \\" );
+                pw.println( "l = " + length_sig + "( j ); \\" );
+                pw.println( "for( n = 0; n == 0? (n="+get_sig+"( j ))||1:0; " + release_sig + "( j, n ))" );
+                pw.println( "#endif" );
             }
             
             pw.println(cppGuardEnd());

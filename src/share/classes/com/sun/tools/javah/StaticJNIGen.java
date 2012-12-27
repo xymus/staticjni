@@ -346,4 +346,54 @@ public abstract class StaticJNIGen extends JNI {
         sb.append( staticjniType( c.arrayType ) );
     	return sb.toString();
     }
+    
+    String newArray(ArrayCallback c, TypeElement from ) {
+        StringBuffer sb = new StringBuffer();
+        if ( from != null ) sb.append( from.getSimpleName() + "_" );
+        sb.append( "new_");
+        sb.append( staticjniType( c.arrayType ) );
+    	return sb.toString();
+    }
+    
+    String setArrayRegion(ArrayCallback c, TypeElement from ) {
+        StringBuffer sb = new StringBuffer();
+        if ( from != null ) sb.append( from.getSimpleName() + "_" );
+        sb.append( "set_region_");
+        sb.append( staticjniType( c.arrayType ) );
+    	return sb.toString();
+    }
+    
+    String accessStringStructureMacro() {
+        StringBuffer sb = new StringBuffer();
+        sb.append( "access_jstring");
+    	return sb.toString();
+    }
+    
+    String accessStringGet(TypeElement from) {
+        StringBuffer sb = new StringBuffer();
+        if ( from != null ) sb.append( from.getSimpleName() + "_" );
+        sb.append( "get_jstring");
+    	return sb.toString();
+    }
+    
+    String accessStringRelease(TypeElement from) {
+        StringBuffer sb = new StringBuffer();
+        if ( from != null ) sb.append( from.getSimpleName() + "_" );
+        sb.append( "release_jstring");
+    	return sb.toString();
+    }
+    
+    String accessStringLength(TypeElement from) {
+        StringBuffer sb = new StringBuffer();
+        if ( from != null ) sb.append( from.getSimpleName() + "_" );
+        sb.append( "get_length_jstring");
+    	return sb.toString();
+    }
+    
+    String newString(TypeElement from) {
+        StringBuffer sb = new StringBuffer();
+        if ( from != null ) sb.append( from.getSimpleName() + "_" );
+        sb.append( "new_jstring");
+    	return sb.toString();
+    }
 }

@@ -79,6 +79,8 @@ public class StaticJNIClassHelper {
     Set<ExceptionCallback> exceptionCallbacks = new HashSet<ExceptionCallback>();
     Set<ArrayCallback> arrayCallbacks = new HashSet<ArrayCallback>();
     
+    boolean usesString;
+    
     // Referred types
     Set<TypeMirror> referredTypes = new HashSet<TypeMirror>(); 
     
@@ -94,6 +96,8 @@ public class StaticJNIClassHelper {
             exceptionCallbacks.clear();
             arrayCallbacks.clear();
             referredTypes.clear();
+            
+            usesString = false;
             
             List<ExecutableElement> classmethods = ElementFilter.methodsIn(clazz.getEnclosedElements());
             for (ExecutableElement md: classmethods) {
@@ -276,6 +280,16 @@ public class StaticJNIClassHelper {
                 t = f.field.asType();
                 if ( gen.advancedStaticType(t) )
                     referredTypes.add( t );
+            }
+            
+            // scan types for special needs
+            TypeElement jString = gen.elems.getTypeElement("java.lang.String");
+            for ( TypeMirror c: referredTypes ) {
+            	if ( gen.types.asElement(c).equals(jString) ) {
+            		// String is in use
+            		usesString = true;
+            		break;
+            	}
             }
         }
     }

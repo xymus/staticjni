@@ -560,6 +560,79 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 pw.println( "};" );
                 pw.println( "#endif" );
             }
+            
+            if ( helper.usesString ) {
+            	String get_sig_local = accessStringGet(clazz);
+            	String release_sig_local = accessStringRelease(clazz);
+            	String length_sig_local = accessStringLength(clazz);
+
+                String guard = "STATICJNI_ARRAY_" + length_sig_local;
+                pw.println( "#ifndef "+ guard );
+                pw.println( "#define "+ guard );
+            	
+            	/** unicode **/
+            	
+            	// Get
+                pw.println();
+                pw.println( "jchar *" + get_sig_local  + "( jstring value ) {" );
+                pw.print( "\treturn (jchar*)(*thread_env)->GetStringChars" );
+                pw.println( "( thread_env, value, NULL );");
+                pw.println( "};" );
+
+            	// Release
+                pw.println();
+                pw.println( "void " + release_sig_local + "( jstring value, const jchar* ncopy ) {" );
+                pw.print( "\t(*thread_env)->ReleaseStringChars" );
+                pw.println( "( thread_env, value, ncopy );");
+                pw.println( "};" );
+
+                // New
+            	String new_sig_local = newString(clazz);
+                pw.println( "jstring " + new_sig_local + "( const jchar* src, jsize size ) {" );
+                pw.print( "\treturn (*thread_env)->NewString( thread_env, src, size );");
+                pw.println( "};" );
+
+            	// Length
+                pw.println( "" );
+                pw.println( "jint " + length_sig_local + "( jstring value ) {" );
+                pw.print( "\treturn (*thread_env)->GetStringLength" );
+                pw.println( "( thread_env, value );");
+                pw.println( "};" );
+            	
+            	/** utf8 **/
+            	
+            	// Get
+            	get_sig_local = get_sig_local + "_utf8";
+                pw.println();
+                pw.println( "jchar *" + get_sig_local  + "( jstring value ) {" );
+                pw.print( "\treturn (jchar*)(*thread_env)->GetStringChars" );
+                pw.println( "( thread_env, value, NULL );");
+                pw.println( "};" );
+
+            	// Release
+                release_sig_local = release_sig_local + "_utf8";
+                pw.println();
+                pw.println( "void " + release_sig_local + "( jstring value, jchar* ncopy ) {" );
+                pw.print( "\t(*thread_env)->ReleaseStringChars" );
+                pw.println( "( thread_env, value, ncopy );");
+                pw.println( "};" );
+
+                // New
+                new_sig_local = new_sig_local + "_utf8";
+                pw.println( "jstring " + new_sig_local + "( const jchar* src, jsize size ) {" );
+                pw.print( "\treturn (*thread_env)->NewString( thread_env, src, size );");
+                pw.println( "};" );
+
+            	// Length of array
+            	length_sig_local = length_sig_local + "_utf8";
+                pw.println( "" );
+                pw.println( "jint " + length_sig_local + "( jstring value ) {" );
+                pw.print( "\treturn (*thread_env)->GetStringLength" );
+                pw.println( "( thread_env, value );");
+                pw.println( "};" );
+                
+                pw.println( "#endif" );
+            }
 
             pw.println(cppGuardEnd());
         } catch (TypeSignature.SignatureException e) {
