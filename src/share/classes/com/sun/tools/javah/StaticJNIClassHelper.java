@@ -47,10 +47,6 @@ import com.sun.tools.javah.staticjni.Callback;
 import com.sun.tools.javah.staticjni.ExceptionCallback;
 import com.sun.tools.javah.staticjni.FieldCallback;
 
-import net.xymus.staticjni.NativeArrayAccess;
-import net.xymus.staticjni.NativeArrayAccesses;
-import net.xymus.staticjni.NativeArrayAccessCritical;
-import net.xymus.staticjni.NativeArrayAccessesCritical;
 import net.xymus.staticjni.NativeCall;
 import net.xymus.staticjni.NativeCalls;
 import net.xymus.staticjni.NativeNew;
