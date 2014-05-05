@@ -264,13 +264,26 @@ public class StaticJNIClassHelper {
                 gen.util.error("err.staticjni.classnotfound", words[0], from );
             }
         }
+        
+        //Check for the signature
+        String sig = null;
+        if( name.contains("(") && name.contains(")") ) {
+		String[] t = name.split("\\(");
+		sig = "("+ t[1];
+		name = t[0];
+        }
 
         // try to find in methods
         List<ExecutableElement> methods = ElementFilter.methodsIn( clazz.getEnclosedElements() );
         for (ExecutableElement m: methods) {
             if ( name.toString().equals( m.getSimpleName().toString() ) ) {
-                callbacks.add( new Callback(clazz, m));
-                return;
+		if ( sig == null ) {
+			callbacks.add( new Callback(clazz, m));
+			return;
+		} else if( sig.equals( gen.signature(m) ) ) {
+			callbacks.add( new Callback(clazz, m));
+			return;
+		}
             }
         }
 
@@ -302,12 +315,26 @@ public class StaticJNIClassHelper {
                 gen.util.error("err.staticjni.classnotfound", words[0], from );
             }
         //}
+        
+        //Check for the signature
+       String sig = null;
+        if( name.contains("(") && name.contains(")") ) {
+		String[] t = name.split("\\(");
+		sig = "("+ t[1];
+		name = t[0];
+        }
 
-        // return first constructor
+        // return the first constructor if no signature was specified, or the
+        // constructor wich correspond to the signature
         List<ExecutableElement> consts = ElementFilter.constructorsIn( clazz.getEnclosedElements() );
         for (ExecutableElement c: consts) {
-            callbacks.add( new Callback(clazz, c));
-            return;
+		if( sig == null) {
+			callbacks.add( new Callback(clazz, c));
+			return;
+		} else if ( sig.equals( gen.signature(c) ) ) {
+			callbacks.add( new Callback(clazz, c));
+			return;
+		}
         }
         
         gen.util.error("err.staticjni.methnotfound", name, from );
