@@ -1,9 +1,14 @@
 package complex;
 
 public class Sub {
-	public int i = 123;
+	public int i;
 	
 	public Sub() {
+		this.i = 123;
+	}
+	
+	public Sub(int i){
+		this.i = i;
 	}
 	
 	void foo() {

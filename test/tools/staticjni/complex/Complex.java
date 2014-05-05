@@ -49,7 +49,7 @@ public class Complex {
 	/*
 	 * Instantiate a Sub and returns it
 	 */
-	@NativeNew( "complex.Sub" )
+	@NativeNew( "complex.Sub (int)" )
 	public native Sub playWithConstructors();
 
 	/*
