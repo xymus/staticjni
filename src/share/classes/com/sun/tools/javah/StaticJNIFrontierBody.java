@@ -73,6 +73,8 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
             PrintWriter pw = wrapWriter(o);
             
             pw.println(getIncludes(clazz.getQualifiedName()));
+            pw.println( "#include <stdlib.h>" );
+            pw.println( "#include <stdio.h>" );
             
             pw.println(cppGuardBegin());
             
@@ -216,13 +218,13 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 /* Implementation of callback */
 
                 if (m.getModifiers().contains(Modifier.STATIC)) {
-                    pw.println("\tjclass jclass = (*thread_env)->FindClass( thread_env, \""
+                    pw.println("\t jclass jclass = (*thread_env)->FindClass( thread_env, \""
                             + c.recvType.getQualifiedName().toString().replace('.', '/') + "\" );");
                     pw.println("\tif ( jclass == 0 ) {");
-                    pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
+                    pw.println("\t\t(*thread_env)->FatalError( thread_env, \"Cannot find class for " + c.toString() + "\\n\" );");
                     pw.println("\t}");
                 } else {
-                    pw.println("\tjclass jclass = (*thread_env)->GetObjectClass( thread_env, "
+                    pw.println("\t jclass jclass = (*thread_env)->GetObjectClass( thread_env, "
                             + castFromStaticjni(clazz.asType(), "self") + " );");
                     pw.println("\tif ( jclass == 0 ) {");
                     pw.println("\t\t(*thread_env)->FatalError( thread_env, \"Cannot find class for " + c.toString() + "\" );");
@@ -233,12 +235,12 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 TypeSignature newtypesig = new TypeSignature(elems);
 
                 if (m.getModifiers().contains(Modifier.STATIC)) {
-                    pw.println("\tjmethodID jmeth = (*thread_env)->GetStaticMethodID( thread_env, jclass, \""
+                    pw.println("\t jmethodID jmeth = (*thread_env)->GetStaticMethodID( thread_env, jclass, \""
                             + m.getSimpleName().toString()
                             + "\", \""
                             + newtypesig.getTypeSignature(sig, rtm) + "\" );");
                 } else {
-                    pw.println("\tjmethodID jmeth = (*thread_env)->GetMethodID( thread_env, jclass, \""
+                    pw.println("\t jmethodID jmeth = (*thread_env)->GetMethodID( thread_env, jclass, \""
                             + m.getSimpleName().toString()
                             + "\", \""
                             + newtypesig.getTypeSignature(sig, rtm) + "\" );");
@@ -293,10 +295,10 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 		qname = qname.substring(0,i) + "$" + qname.substring(i+1);
                 	}
             		System.out.println( qname + " " + c.recvType.getKind() + " " + c.recvType.getEnclosingElement().getKind() );
-                    pw.println("\tjclass jclass = (*thread_env)->FindClass( thread_env, \""
+                    pw.println("\t jclass jclass = (*thread_env)->FindClass( thread_env, \""
                             + qname + "\" );");
                 } else {
-                    pw.println("\tjclass jclass = (*thread_env)->GetObjectClass( thread_env, "
+                    pw.println("\t jclass jclass = (*thread_env)->GetObjectClass( thread_env, "
                             + castFromStaticjni(clazz.asType(), "self") + " );");
                 }
                 pw.println("\tif ( jclass == 0 ) {");
@@ -304,18 +306,18 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 pw.println("\t}"); 
 
                 if (c.field.getModifiers().contains(Modifier.STATIC)) {
-                    pw.println("\tjfieldID jfield = (*thread_env)->GetStaticFieldID( thread_env, jclass, \""
+                    pw.println("\t jfieldID jfield = (*thread_env)->GetStaticFieldID( thread_env, jclass, \""
                             + c.field.getSimpleName().toString() + "\", \"" +
                             newtypesig.getTypeSignature(types.erasure( c.field.asType()).toString())
                             + "\" );");
                 } else {
-                    pw.println("\tjfieldID jfield = (*thread_env)->GetFieldID( thread_env, jclass, \""
+                    pw.println("\t jfieldID jfield = (*thread_env)->GetFieldID( thread_env, jclass, \""
                             + c.field.getSimpleName().toString() + "\", \"" +
                             newtypesig.getTypeSignature(types.erasure( c.field.asType()).toString())
                             + "\" );");
                 }
                 pw.println("\tif ( jfield == 0 ) {");
-                pw.println("\t\tfprintf( stderr, \"Cannot find field: "
+                pw.println("\t\t(*thread_env)->FatalError( thread_env, \"Cannot find field: "
                         + c.field.getSimpleName().toString() + "\\n\" );");
                 pw.println("\t}");
 
@@ -351,29 +353,29 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 		int i = qname.lastIndexOf('/');
                 		qname = qname.substring(0,i) + "$" + qname.substring(i+1);
                 	}
-                    pw.println("\tjclass jclass = (*thread_env)->FindClass( thread_env, \""
+                    pw.println("\t jclass jclass = (*thread_env)->FindClass( thread_env, \""
                             + qname + "\" );");
                 } else {
-                    pw.println("\tjclass jclass = (*thread_env)->GetObjectClass( thread_env, "
+                    pw.println("\t jclass jclass = (*thread_env)->GetObjectClass( thread_env, "
                             + castFromStaticjni(clazz.asType(), "self") + " );");
                 }
                 pw.println("\tif ( jclass == 0 ) {");
-                pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
+                pw.println("\t\t(*thread_env)->FatalError( thread_env, \"Cannot find class for " + c.toString() + "\\n\" );");
                 pw.println("\t}"); 
 
                 if (c.field.getModifiers().contains(Modifier.STATIC)) {
-                    pw.println("\tjfieldID jfield = (*thread_env)->GetStaticFieldID( thread_env, jclass, \""
+                    pw.println("\t jfieldID jfield = (*thread_env)->GetStaticFieldID( thread_env, jclass, \""
                             + c.field.getSimpleName().toString() + "\", \"" +
                             newtypesig.getTypeSignature(types.erasure( c.field.asType()).toString())
                             + "\" );");
                 } else {
-                    pw.println("\tjfieldID jfield = (*thread_env)->GetFieldID( thread_env, jclass, \""
+                    pw.println("\t jfieldID jfield = (*thread_env)->GetFieldID( thread_env, jclass, \""
                             + c.field.getSimpleName().toString() + "\", \"" +
                             newtypesig.getTypeSignature(types.erasure( c.field.asType()).toString())
                             + "\" );");
                 }
                 pw.println("\tif ( jfield == 0 ) {");
-                pw.println("\t\tfprintf( stderr, \"Cannot find field: "
+                pw.println("\t\t(*thread_env)->FatalError( thread_env, \"Cannot find field: "
                         + c.field.getSimpleName().toString() + "\\n\" );");
                 pw.println("\t}");
 
@@ -411,10 +413,10 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 /* Implementation of callback */
 
                 if (!m.getModifiers().contains(Modifier.STATIC)) {
-                    pw.println("\tjclass jclass = (*thread_env)->GetObjectClass( thread_env, "
+                    pw.println("\t jclass jclass = (*thread_env)->GetObjectClass( thread_env, "
                             + castFromStaticjni(clazz.asType(), "self") + " );");
                     pw.println("\tif ( jclass == 0 ) {");
-                    pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
+                    pw.println("\t\t(*thread_env)->FatalError( thread_env, \"Cannot find class for " + c.toString() + "\\n\" );");
                     pw.println("\t}");
                     
                     // retreive super class
@@ -424,12 +426,12 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                     String sig = signature(m);
                     TypeSignature newtypesig = new TypeSignature(elems);
 
-                    pw.println("\tjmethodID jmeth = (*thread_env)->GetMethodID( thread_env, jclass, \""
+                    pw.println("\t jmethodID jmeth = (*thread_env)->GetMethodID( thread_env, jclass, \""
                             + m.getSimpleName().toString()
                             + "\", \""
                             + newtypesig.getTypeSignature(sig, rtm) + "\" );");
                     pw.println("\tif ( jmeth == 0 ) {");
-                    pw.println("\t\tfprintf( stderr, \"Cannot find method: "
+                    pw.println("\t\t(*thread_env)->FatalError( thread_env, \"Cannot find method: "
                             + m.getSimpleName().toString() + "\\n\" );");
                     pw.println("\t}");
                 }
@@ -469,10 +471,10 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 
                 pw.println(signature + " {");
 
-                pw.println("\tjclass jclass = (*thread_env)->FindClass( thread_env, \""
+                pw.println("\t jclass jclass = (*thread_env)->FindClass( thread_env, \""
                         + c.recvType.getQualifiedName().toString().replace('.', '/') + "\" );");
                 pw.println("\tif ( jclass == 0 ) {");
-                pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
+                pw.println("\t\t(*thread_env)->FatalError( thread_env, \"Cannot find class for " + c.toString() + "\\n\" );");
                 pw.println("\t}");
 
                 TypeSignature newtypesig = new TypeSignature(elems);
@@ -482,9 +484,9 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
                 int li = tsig.lastIndexOf(')');
                 tsig = tsig.substring(0,li+1) + "V";
 
-                pw.println("\tjmethodID jmeth = (*thread_env)->GetMethodID( thread_env, jclass, \"<init>\", \"" + tsig + "\" );");
+                pw.println("\t jmethodID jmeth = (*thread_env)->GetMethodID( thread_env, jclass, \"<init>\", \"" + tsig + "\" );");
                 pw.println("\tif ( jmeth == 0 ) {");
-                pw.println("\t\tfprintf( stderr, \"Cannot find constructor: "
+                pw.println("\t\t(*thread_env)->FatalError( thread_env, \"Cannot find constructor: "
                         + c.meth.getSimpleName().toString() + "\\n\" );");
                 pw.println("\t}");
 
@@ -508,14 +510,14 @@ public class StaticJNIFrontierBody extends StaticJNIGen {
             	pw.println( "#define " + guard );
                 pw.println(signature + " {");
                 
-                pw.println("\tjclass jclass = (*thread_env)->FindClass( thread_env, \""
+                pw.println("\t jclass jclass = (*thread_env)->FindClass( thread_env, \""
                         + ((TypeElement)types.asElement(c.exceptionType)).getQualifiedName().toString().replace('.', '/') + "\" );");
                 pw.println("\tif ( jclass == 0 ) {");
-                pw.println("\t\tfprintf( stderr, \"Cannot find class for " + c.toString() + "\\n\" );");
+                pw.println("\t\t(*thread_env)->FatalError( thread_env, \"Cannot find class for " + c.toString() + "\\n\" );");
                 pw.println("\t}");
 
                 pw.println("\tif ( (*thread_env)->ThrowNew(thread_env, jclass, msg ) ) {");
-                pw.println("\t\tfprintf( stderr, \"Throw failed for " + c.toString() + "\\n\" );");
+                pw.println("\t\t(*thread_env)->FatalError( thread_env, \"Throw failed for " + c.toString() + "\\n\" );");
                 pw.println("\t}");
                 
                 pw.println("\t(*thread_env)->DeleteLocalRef(thread_env, jclass );");
