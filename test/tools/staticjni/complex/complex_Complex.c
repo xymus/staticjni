@@ -121,7 +121,7 @@ void Complex_StaticBar__impl() {
  */
 Sub Complex_playWithConstructors__impl
  ( Complex self ) {
-	return new_Sub();
+	return new_Sub(123);
 }
 
 /*
